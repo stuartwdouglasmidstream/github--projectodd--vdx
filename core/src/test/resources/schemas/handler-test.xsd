@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="urn:vdx:test"
+           targetNamespace="urn:vdx:test"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+  <xs:element name="foo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="bar" type="barType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="biscuit" type="biscuitType" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="attr3" type="xs:string"/>
+    </xs:complexType>
+
+  </xs:element>
+
+  <xs:complexType name="barType">
+    <xs:attribute name="attr1" use="required" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="biscuitType">
+  </xs:complexType>
+</xs:schema>

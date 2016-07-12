@@ -26,7 +26,7 @@ public class ErrorPrinter {
 
             final StringBuilder out = new StringBuilder()
                     .append('\n')
-                    .append(divider("Validation Error in " + docPathParts[docPathParts.length]))
+                    .append(divider("Validation Error in " + docPathParts[docPathParts.length - 1]))
                     .append('\n')
                     .append(prefixLines(linum, maxLinumWidth))
                     .append('\n')

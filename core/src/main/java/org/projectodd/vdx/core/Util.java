@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -49,11 +50,15 @@ public class Util {
         return false;
     }
 
-    public static String alternateSpelling(final String current, final List<String> alternates) {
+    public static String alternateSpelling(final String current, final Collection<String> alternates) {
+        return alternateSpelling(current, alternates, 4);
+    }
+
+    public static String alternateSpelling(final String current, final Collection<String> alternates, final int threshold) {
         final String alternate = alternates.stream()
                 .map(s -> {
                     final int dist = StringUtils.getLevenshteinDistance(current, s);
-                    if (dist < 4) { // difference threshold
+                    if (dist < threshold) {
                         return String.format("%s:%s", dist, s);
                     } else {
                         return null;
@@ -73,9 +78,18 @@ public class Util {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> List<T> asSortedList(Collection<? extends T> col) {
+        if (col == null) {
+            return Collections.EMPTY_LIST;
+        }
+
         return col.stream()
                 .sorted()
                 .collect(Collectors.toList());
+    }
+
+    public static String pathToString(List<String> path) {
+        return String.join(" > ", path);
     }
 }

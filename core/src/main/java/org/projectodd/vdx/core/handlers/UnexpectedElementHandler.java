@@ -1,8 +1,10 @@
 package org.projectodd.vdx.core.handlers;
 
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 
 import org.projectodd.vdx.core.ErrorHandler;
@@ -14,32 +16,37 @@ public class UnexpectedElementHandler implements ErrorHandler {
     @Override
     public HandledResult handle(ValidationContext ctx, ValidationError error) {
         final Location loc = error.location();
-        final String el = error.element().getLocalPart();
+        final QName el = error.element();
+        final String elName = el.getLocalPart();
+        final Set<List<String>> altElements = ctx.alternateElementsForElement(el);
 
-        //String extra;
+        String extra = null;
 
-        // TODO: have a way to detect where the element could go
-        // TODO: find legal elements for current parent (do we know enough to do this?)
-
-       /* if (!altElements.isEmpty()) {
-            extra = String.format("'%s' is allowed on elements: %s\nDid you intend to put it on one of those elements?",
-                                  attr,
-                                  String.join(", ", altElements));
+        if (!altElements.isEmpty()) {
+            extra = String.format("'%s' is allowed in elements: %s\nDid you intend to put it in one of those elements?",
+                                  elName,
+                                  String.join(", ", altElements.stream()
+                                          .map(Util::pathToString)
+                                          .sorted()
+                                          .collect(Collectors.toList())));
         } else {
-            final List<String> otherAttributes = error. ctx.attributesForElement(error.element());
+            // TODO: find legal elements for current parent (do we know enough to do this?)
+            final List<String> otherElements = Util.asSortedList(error.alternatives());
 
-            final String altSpelling = Util.alternateSpelling(attr, otherAttributes);
+            if (!otherElements.isEmpty()) {
+                final String altSpelling = Util.alternateSpelling(elName, otherElements);
 
-            if (altSpelling != null) {
-                extra = String.format("Did you mean '%s'?", altSpelling);
-            } else {
-                extra = String.format("legal attributes are: %s", String.join(", ", otherAttributes));
+                if (altSpelling != null) {
+                    extra = String.format("Did you mean '%s'?", altSpelling);
+                } else {
+                    extra = String.format("elements allowed here are: %s", String.join(", ", otherElements));
+                }
             }
-        }*/
+        }
 
         return new HandledResult(loc.getLineNumber(),
                                  loc.getColumnNumber(),
-                                 String.format("'%s' isn't an allowed attribute for the '%s' element", el, el),
-                                 null); //extra);
+                                 String.format("'%s' isn't an allowed element here", elName),
+                                 extra);
     }
 }

@@ -38,7 +38,7 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
                 if (altSpelling != null) {
                     extra = String.format("Did you mean '%s'?", altSpelling);
                 } else {
-                    extra = String.format("legal attributes are: %s", String.join(", ", otherAttributes));
+                    extra = String.format("attributes allowed here are: %s", String.join(", ", otherAttributes));
                 }
             }
         }

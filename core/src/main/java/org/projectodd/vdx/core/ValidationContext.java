@@ -5,10 +5,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,23 +70,34 @@ public class ValidationContext {
         return error.type().handler().handle(this, error);
     }
 
-    public Set<String> alternateElementsForAttribute(String attribute) {
-        return walkSchemas().stream()
-                .map(e -> e.attributes().contains(attribute) ? e.name() : null)
-                .filter(e -> e != null)
+    public Set<String> alternateElementsForAttribute(final String attribute) {
+        return walkSchemas().reduce(new HashSet<>(), (accum, element) -> {
+            if (element.attributes().contains(attribute)) {
+                accum.add(element.name());
+            }
+
+            return accum;
+        });
+    }
+
+    public Set<List<String>> alternateElementsForElement(final QName element) {
+        return walkSchemas().pathsToValue(el -> el.qname().equals(element))
+                .stream()
+                .map(x -> x.stream().map(Element::name).collect(Collectors.toList()))
                 .collect(Collectors.toSet());
     }
 
+
     @SuppressWarnings("unchecked")
-    public Set<String> attributesForElement(QName elName) {
-        for(Element e: walkSchemas()) {
-            if (e.qname().equals(elName)) {
+    public Set<String> attributesForElement(final QName elName) {
+        return walkSchemas().reduce(new HashSet<>(), (accum, el) -> {
+                if (el.qname().equals(elName)) {
+                    accum.addAll(el.attributes());
+                    Tree.reduceComplete(accum);
+                }
 
-                return e.attributes();
-            }
-        }
-
-        return Collections.EMPTY_SET;
+                return accum;
+            });
     }
 
     public Position searchForward(final int startLine, final int startCol, final Pattern regex) {
@@ -103,31 +118,35 @@ public class ValidationContext {
         }
     }
 
-    private List<Element> walkSchemas() {
+    private Tree<Element> walkSchemas() {
         if (this.walkedSchemas == null) {
-            final List<Element> ret = new ArrayList<>();
-            final ThreadLocal<Element> current = new ThreadLocal<>();
+            this.walkedSchemas = new Tree<>();
+            final Deque<Tree <Element>> stack = new ArrayDeque<>();
+            final Map<QName, Tree<Element>> elementCache = new HashMap<>();
+
+            stack.push(this.walkedSchemas);
+
             final XmlSchemaWalker walker = new XmlSchemaWalker(this.schemas, new XmlSchemaVisitor() {
                 @Override
                 public void onEnterElement(XmlSchemaElement element, XmlSchemaTypeInfo typeInfo, boolean previouslyVisited) {
-                    current.set(new Element(element.getQName()));
-                    if (!previouslyVisited) {
-                        ret.add(current.get());
+                    final QName qName = element.getQName();
+                    Tree<Element> el = elementCache.get(qName);
+                    if (el == null) {
+                        el = new Tree<>(new Element(qName));
+                        elementCache.put(qName, el);
                     }
+                    stack.peek().addChild(el);
+                    stack.push(el);
                 }
 
                 @Override
                 public void onExitElement(XmlSchemaElement element, XmlSchemaTypeInfo typeInfo, boolean previouslyVisited) {
-                    current.remove();
+                    stack.pop();
                 }
 
                 @Override
                 public void onVisitAttribute(XmlSchemaElement element, XmlSchemaAttrInfo attrInfo) {
-                    if (current.get() != null) {
-                        current.get().addAttribute(attrInfo.getAttribute().getName());
-                    } else {
-                        System.err.println("attr " + attrInfo.getAttribute().getQName() + " with no element current!");
-                    }
+                    stack.peek().value().addAttribute(attrInfo.getAttribute().getName());
                 }
 
                 @Override
@@ -187,8 +206,6 @@ public class ValidationContext {
             });
 
             Arrays.stream(this.schemas.getXmlSchemas()).forEach(s -> s.getElements().values().forEach(walker::walk));
-
-            this.walkedSchemas = ret;
         }
 
         return this.walkedSchemas;
@@ -196,7 +213,7 @@ public class ValidationContext {
 
     private final List<String> lines;
     private final XmlSchemaCollection schemas = new XmlSchemaCollection();
-    private List<Element> walkedSchemas = null;
+    private Tree<Element> walkedSchemas = null;
 
 
     public class Position {

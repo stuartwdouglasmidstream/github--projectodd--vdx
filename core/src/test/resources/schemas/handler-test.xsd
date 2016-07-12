@@ -17,8 +17,31 @@
   </xs:element>
 
   <xs:complexType name="barType">
+    <xs:sequence>
+      <xs:element name="sandwiches" type="sandwichesType">
+      </xs:element>
+    </xs:sequence>
     <xs:attribute name="attr1" use="required" type="xs:string"/>
   </xs:complexType>
+
+  <xs:complexType name="sandwichType">
+  </xs:complexType>
+
+  <xs:complexType name="sandwichesType">
+    <xs:sequence>
+      <xs:element name="sandwich" type="sandwichType">
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="omelet">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="sandwiches" type="sandwichesType">
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 
   <xs:complexType name="biscuitType">
   </xs:complexType>

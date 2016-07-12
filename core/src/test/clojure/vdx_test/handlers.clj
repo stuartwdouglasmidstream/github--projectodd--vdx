@@ -46,7 +46,7 @@
                                            (QName. "urn:vdx:test" "bar")
                                            (QName. "blahblahblah")
                                            nil))]
-        (is (= "legal attributes are: attr1" (.extraMessage res)))))
+        (is (= "attributes allowed here are: attr1" (.extraMessage res)))))
 
     (testing "unmatchable attribute with provided alternatives"
       (let [res (.handle (UnexpectedAttributeHandler.)
@@ -56,7 +56,7 @@
                                            (QName. "urn:vdx:test" "bar")
                                            (QName. "blahblahblah")
                                            #{"abc"}))]
-        (is (= "legal attributes are: abc" (.extraMessage res)))))
+        (is (= "attributes allowed here are: abc" (.extraMessage res)))))
 
     (testing "misspelled attribute with schema alternatives"
       (let [res (.handle (UnexpectedAttributeHandler.)
@@ -90,5 +90,50 @@
                                            nil))]
         (is (= 28 (.column res)))
         (is (= "'attr3' is allowed on elements: foo\nDid you intend to put it on one of those elements?"
+               (.extraMessage res)))))
+    ))
+
+(deftest test-UnexpectedElementHandler
+  (let [ctx (ValidationContext. (io/resource "handler-test.xml")
+                                (io/resource "schemas")
+                                [(io/resource "schemas/handler-test.xsd")])]
+    (testing "unmatchable element with no alternates"
+      (let [res (.handle (UnexpectedElementHandler.)
+                         ctx
+                         (ValidationError. ErrorType/UNEXPECTED_ELEMENT
+                                           (location 6 4)
+                                           (QName. "urn:vdx:test" "ham")
+                                           nil))]
+        (is (= 6 (.line res)))
+        (is (= 4 (.column res)))
+        (is (= "'ham' isn't an allowed element here" (.message res)))
+        (is (nil? (.extraMessage res)))))
+
+    (testing "unmatchable element with provided alternatives"
+      (let [res (.handle (UnexpectedElementHandler.)
+                         ctx
+                         (ValidationError. ErrorType/UNEXPECTED_ELEMENT
+                                           (location 6 4)
+                                           (QName. "urn:vdx:test" "ham")
+                                           #{"abcdefg"}))]
+        (is (= "elements allowed here are: abcdefg" (.extraMessage res)))))
+
+    (testing "misspelled element with provided alternatives"
+      (let [res (.handle (UnexpectedElementHandler.)
+                         ctx
+                         (ValidationError. ErrorType/UNEXPECTED_ELEMENT
+                                           (location 6 4)
+                                           (QName. "urn:vdx:test" "ham")
+                                           #{"abc"}))]
+        (is (= "Did you mean 'abc'?" (.extraMessage res)))))
+
+    (testing "matchable element"
+      (let [res (.handle (UnexpectedElementHandler.)
+                         ctx
+                         (ValidationError. ErrorType/UNEXPECTED_ELEMENT
+                                           (location 7 4)
+                                           (QName. "urn:vdx:test" "sandwich")
+                                           nil))]
+        (is (= "'sandwich' is allowed in elements: foo > bar > sandwiches, omelet > sandwiches\nDid you intend to put it in one of those elements?"
                (.extraMessage res)))))
     ))

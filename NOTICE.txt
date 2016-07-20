@@ -1,0 +1,6 @@
+VDX
+
+Copyright 2016 Red Hat, Inc
+
+This project includes software from the Apache Commons Lang project
+(https://commons.apache.org/proper/commons-lang/).

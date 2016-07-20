@@ -2,7 +2,6 @@ package org.projectodd.vdx.core.handlers;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
@@ -25,10 +24,7 @@ public class UnexpectedElementHandler implements ErrorHandler {
         if (!altElements.isEmpty()) {
             extra = String.format("'%s' is allowed in elements: %s\nDid you intend to put it in one of those elements?",
                                   elName,
-                                  String.join(", ", altElements.stream()
-                                          .map(Util::pathToString)
-                                          .sorted()
-                                          .collect(Collectors.toList())));
+                                  Util.pathsToString(altElements));
         } else {
             // TODO: find legal elements for current parent (do we know enough to do this?)
             final List<String> otherElements = Util.asSortedList(error.alternatives());

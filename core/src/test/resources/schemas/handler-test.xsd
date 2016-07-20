@@ -22,6 +22,7 @@
       </xs:element>
     </xs:sequence>
     <xs:attribute name="attr1" use="required" type="xs:string"/>
+    <xs:attribute name="some-attr" use="optional" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="sandwichType">

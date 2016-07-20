@@ -30,7 +30,7 @@ public class ErrorPrinter {
                     .append('\n')
                     .append(prefixLines(linum, maxLinumWidth))
                     .append('\n')
-                    .append(leftPad(maxLinumWidth + res.column + 2, "^ " + res.message))
+                    .append(leftPad(maxLinumWidth + res.column + 1, "^ " + res.message))
                     .append("\n\n")
                     .append(postfixLines(linum, maxLinumWidth))
                     .append('\n');

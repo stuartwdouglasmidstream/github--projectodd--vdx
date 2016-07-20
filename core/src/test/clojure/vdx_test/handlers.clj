@@ -46,7 +46,7 @@
                                            (QName. "urn:vdx:test" "bar")
                                            (QName. "blahblahblah")
                                            nil))]
-        (is (= "attributes allowed here are: attr1" (.extraMessage res)))))
+        (is (= "attributes allowed here are: attr1, some-attr" (.extraMessage res)))))
 
     (testing "unmatchable attribute with provided alternatives"
       (let [res (.handle (UnexpectedAttributeHandler.)

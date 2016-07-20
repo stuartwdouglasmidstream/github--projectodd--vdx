@@ -1,6 +1,7 @@
 package org.projectodd.vdx.core.handlers;
 
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.xml.stream.Location;
@@ -20,14 +21,14 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
         final String el = error.element().getLocalPart();
         final ValidationContext.Position pos = ctx.searchForward(loc.getLineNumber() - 1, loc.getColumnNumber(),
                                                                  Pattern.compile(attr + "\\s*="));
-        final List<String> altElements = Util.asSortedList(ctx.alternateElementsForAttribute(attr));
+        final Set<List<String>> altElements = ctx.alternateElementsForAttribute(attr);
 
         String extra = null;
 
         if (!altElements.isEmpty()) {
             extra = String.format("'%s' is allowed on elements: %s\nDid you intend to put it on one of those elements?",
                                   attr,
-                                  String.join(", ", altElements));
+                                  Util.pathsToString(altElements));
         } else {
             final List<String> otherAttributes = Util.asSortedList(error.alternatives() != null ?
                                                                            error.alternatives() :

@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -70,23 +71,20 @@ public class ValidationContext {
         return error.type().handler().handle(this, error);
     }
 
-    public Set<String> alternateElementsForAttribute(final String attribute) {
-        return walkSchemas().reduce(new HashSet<>(), (accum, element) -> {
-            if (element.attributes().contains(attribute)) {
-                accum.add(element.name());
-            }
-
-            return accum;
-        });
+    public Set<List<String>> alternateElementsForAttribute(final String attribute) {
+        return alternateElements(true, el -> el.attributes().contains(attribute));
     }
 
     public Set<List<String>> alternateElementsForElement(final QName element) {
-        return walkSchemas().pathsToValue(el -> el.qname().equals(element))
+        return alternateElements(false, el -> el.qname().equals(element));
+    }
+
+    protected Set<List<String>> alternateElements(final boolean includeValue, final Function<Element, Boolean> pred) {
+        return walkSchemas().pathsToValue(includeValue, pred)
                 .stream()
                 .map(x -> x.stream().map(Element::name).collect(Collectors.toList()))
                 .collect(Collectors.toSet());
     }
-
 
     @SuppressWarnings("unchecked")
     public Set<String> attributesForElement(final QName elName) {

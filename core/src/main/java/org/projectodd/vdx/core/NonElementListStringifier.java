@@ -31,10 +31,11 @@ public class NonElementListStringifier implements Stringifier {
                 .collect(Collectors.toList());
 
         final StringBuilder sb = new StringBuilder();
-        sb.append(String.join(", ", values));
+        sb.append('\n');
+        values.forEach(v -> sb.append("- ").append(v).append('\n'));
 
         if (limit < list.size()) {
-            sb.append(String.format(" (and %s more)", list.size() - limit));
+            sb.append(String.format("(and %s more)\n", list.size() - limit));
         }
 
         return sb.toString();

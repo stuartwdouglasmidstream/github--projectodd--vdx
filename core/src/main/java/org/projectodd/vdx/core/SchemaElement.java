@@ -31,7 +31,7 @@ public class SchemaElement {
 
     @Override
     public String toString() {
-        return "<Element name=" + this.name +
+        return "<SchemaElement name=" + this.name +
                 ", attributes=" + this.attributes + ">";
     }
 

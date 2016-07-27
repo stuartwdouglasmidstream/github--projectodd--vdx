@@ -6,10 +6,10 @@ public interface ErrorHandler {
     class HandledResult {
         public final int line;
         public final int column;
-        public final String message;
-        public final String extraMessage;
+        public final Message message;
+        public final Message extraMessage;
 
-        public HandledResult(final int line, final int column, final String message, final String extraMessage) {
+        public HandledResult(final int line, final int column, final Message message, final Message extraMessage) {
             this.line = line;
             this.column = column;
             this.message = message;

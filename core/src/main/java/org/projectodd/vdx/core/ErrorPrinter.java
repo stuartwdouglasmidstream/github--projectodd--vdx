@@ -7,13 +7,16 @@ import java.util.List;
 
 public class ErrorPrinter {
     public ErrorPrinter(final URL document, final URL baseUrl, final List<URL> schemas) throws IOException {
-        this(document, baseUrl, schemas, Printer.DEFAULT_PRINTER);
+        this(document, baseUrl, schemas, Printer.DEFAULT_PRINTER, null);
     }
 
-    public ErrorPrinter(final URL document, final URL baseUrl, final List<URL> schemas, final Printer printer) throws IOException {
+    public ErrorPrinter(final URL document, final URL baseUrl, final List<URL> schemas, final Printer printer, final List<Stringifier> stringifiers) throws IOException {
         this.context = new ValidationContext(document, baseUrl, schemas);
         this.docURL = document;
         this.printer = printer;
+        if (stringifiers != null) {
+            stringifiers.forEach(Stringify::registerStringifier);
+        }
     }
 
     public void print(ValidationError error) {
@@ -30,13 +33,13 @@ public class ErrorPrinter {
                     .append('\n')
                     .append(prefixLines(linum, maxLinumWidth))
                     .append('\n')
-                    .append(leftPad(maxLinumWidth + res.column + 1, "^ " + res.message))
+                    .append(leftPad(maxLinumWidth + res.column + 1, "^ " + res.message.toString()))
                     .append("\n\n")
                     .append(postfixLines(linum, maxLinumWidth))
                     .append('\n');
 
             if (res.extraMessage != null) {
-                out.append(res.extraMessage)
+                out.append(res.extraMessage.toString())
                         .append("\n\n");
             }
 

@@ -12,7 +12,7 @@
              UnexpectedElementEndHandler
              UnexpectedElementHandler
              UnsupportedElementHandler)
-           (org.projectodd.vdx.core ValidationContext ValidationError ErrorType)
+           (org.projectodd.vdx.core ValidationContext ValidationError ErrorType SchemaElement)
            (javax.xml.stream Location)
            (javax.xml.namespace QName)))
 
@@ -20,6 +20,16 @@
   (reify Location
     (getLineNumber [_] line)
     (getColumnNumber [_] col)))
+
+(defn coerce-value [v]
+  (cond
+    (instance? SchemaElement v) (.name v)
+    (instance? java.util.List v) (map coerce-value v)
+    :default v))
+
+(defn assert-message [msg template & values]
+  (is (= template (.template msg)))
+  (is (= values (map coerce-value (.rawValues msg)))))
 
 (deftest test-UnexpectedAttributeHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
@@ -35,7 +45,9 @@
                                            nil))]
         (is (= 6 (.line res)))
         (is (= 8 (.column res)))
-        (is (= "'biscuit' isn't an allowed attribute for the 'ham' element" (.message res)))
+        (assert-message (.message res)
+          "'%s' isn't an allowed attribute for the '%s' element"
+          "biscuit" "ham")
         (is (nil? (.extraMessage res)))))
 
     (testing "unmatchable attribute with schema alternatives"
@@ -46,7 +58,9 @@
                                            (QName. "urn:vdx:test" "bar")
                                            (QName. "blahblahblah")
                                            nil))]
-        (is (= "attributes allowed here are: attr1, some-attr" (.extraMessage res)))))
+        (assert-message (.extraMessage res)
+          "attributes allowed here are: %s"
+          ["attr1" "some-attr"])))
 
     (testing "unmatchable attribute with provided alternatives"
       (let [res (.handle (UnexpectedAttributeHandler.)
@@ -56,7 +70,8 @@
                                            (QName. "urn:vdx:test" "bar")
                                            (QName. "blahblahblah")
                                            #{"abc"}))]
-        (is (= "attributes allowed here are: abc" (.extraMessage res)))))
+        (assert-message (.extraMessage res)
+          "attributes allowed here are: %s" ["abc"])))
 
     (testing "misspelled attribute with schema alternatives"
       (let [res (.handle (UnexpectedAttributeHandler.)
@@ -67,7 +82,8 @@
                                            (QName. "attr2")
                                            nil))]
         (is (= 18 (.column res)))
-        (is (= "Did you mean 'attr1'?" (.extraMessage res)))))
+        (assert-message (.extraMessage res)
+          "Did you mean '%s'?" "attr1")))
 
     (testing "misspelled attribute with provided alternatives"
       (let [res (.handle (UnexpectedAttributeHandler.)
@@ -78,7 +94,8 @@
                                            (QName. "attr2")
                                            #{"attrx"}))]
         (is (= 18 (.column res)))
-        (is (= "Did you mean 'attrx'?" (.extraMessage res)))))
+        (assert-message (.extraMessage res)
+         "Did you mean '%s'?" "attrx")))
 
     (testing "matchable attribute"
       (let [res (.handle (UnexpectedAttributeHandler.)
@@ -89,9 +106,9 @@
                                            (QName. "attr3")
                                            nil))]
         (is (= 28 (.column res)))
-        (is (= "'attr3' is allowed on elements: foo\nDid you intend to put it on one of those elements?"
-               (.extraMessage res)))))
-    ))
+        (assert-message (.extraMessage res)
+          "'%s' is allowed on elements: %s\nDid you intend to put it on one of those elements?"
+          "attr3" [["foo"]])))))
 
 (deftest test-UnexpectedElementHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
@@ -106,7 +123,8 @@
                                            nil))]
         (is (= 6 (.line res)))
         (is (= 4 (.column res)))
-        (is (= "'ham' isn't an allowed element here" (.message res)))
+        (assert-message (.message res)
+          "'%s' isn't an allowed element here", "ham")
         (is (nil? (.extraMessage res)))))
 
     (testing "unmatchable element with provided alternatives"
@@ -116,7 +134,8 @@
                                            (location 6 4)
                                            (QName. "urn:vdx:test" "ham")
                                            #{"abcdefg"}))]
-        (is (= "elements allowed here are: abcdefg" (.extraMessage res)))))
+        (assert-message (.extraMessage res)
+          "elements allowed here are: %s" ["abcdefg"])))
 
     (testing "misspelled element with provided alternatives"
       (let [res (.handle (UnexpectedElementHandler.)
@@ -125,7 +144,8 @@
                                            (location 6 4)
                                            (QName. "urn:vdx:test" "ham")
                                            #{"abc"}))]
-        (is (= "Did you mean 'abc'?" (.extraMessage res)))))
+        (assert-message (.extraMessage res)
+          "Did you mean '%s'?" "abc")))
 
     (testing "matchable element"
       (let [res (.handle (UnexpectedElementHandler.)
@@ -134,6 +154,6 @@
                                            (location 7 4)
                                            (QName. "urn:vdx:test" "sandwich")
                                            nil))]
-        (is (= "'sandwich' is allowed in elements: foo > bar > sandwiches, omelet > sandwiches\nDid you intend to put it in one of those elements?"
-               (.extraMessage res)))))
-    ))
+        (assert-message (.extraMessage res)
+          "'%s' is allowed in elements: %s\nDid you intend to put it in one of those elements?"
+          "sandwich" [["foo" "bar" "sandwiches"] ["omelet" "sandwiches"]])))))

@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,19 +83,19 @@ public class ValidationContext {
         return error.type().handler().handle(this, error);
     }
 
-    public Set<List<String>> alternateElementsForAttribute(final String attribute) {
+    public List<List<SchemaElement>> alternateElementsForAttribute(final String attribute) {
         return alternateElements(true, el -> el.attributes().contains(attribute));
     }
 
-    public Set<List<String>> alternateElementsForElement(final QName element) {
+    public List<List<SchemaElement>> alternateElementsForElement(final QName element) {
         return alternateElements(false, el -> el.qname().equals(element));
     }
 
-    protected Set<List<String>> alternateElements(final boolean includeValue, final Function<SchemaElement, Boolean> pred) {
+    protected List<List<SchemaElement>> alternateElements(final boolean includeValue, final Function<SchemaElement, Boolean> pred) {
         return walkSchemas().pathsToValue(includeValue, pred)
                 .stream()
                 .map(this::docPathWithPrefix)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     /*
@@ -102,15 +103,17 @@ public class ValidationContext {
     actually being the same element. A better approach may be to walk down every prefix path, and order the results by
     the length of overlap.
      */
-    private List<String> docPathWithPrefix(final List<SchemaElement> path) {
-        final List<String> fullPath = new ArrayList<>();
+    private List<SchemaElement> docPathWithPrefix(final List<SchemaElement> path) {
+        final List<SchemaElement> fullPath = new ArrayList<>();
         final List<List<String>> prefixPaths = walkDoc().pathsToValue(e -> e.equals(path.get(0).name()));
 
         if (!prefixPaths.isEmpty()) {
-            fullPath.addAll(prefixPaths.get(0));
+            fullPath.addAll(prefixPaths.get(0).stream()
+                                    .map(e -> new SchemaElement(QName.valueOf(e)))
+                                    .collect(Collectors.toList()));
         }
 
-        fullPath.addAll(path.stream().map(SchemaElement::name).collect(Collectors.toList()));
+        fullPath.addAll(path);
 
         return fullPath;
     }

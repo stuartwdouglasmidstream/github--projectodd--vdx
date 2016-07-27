@@ -5,6 +5,10 @@ import java.util.stream.Collectors;
 
 public class NonElementListStringifier implements Stringifier {
 
+    public NonElementListStringifier(final int limit) {
+        this.limit = limit;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public boolean handles(Object value) {
@@ -19,8 +23,22 @@ public class NonElementListStringifier implements Stringifier {
 
     @Override
     public String asString(Object value) {
-        return String.join(", ", ((List<?>)value).stream()
+        final List<?> list = (List<?>)value;
+
+        final List<String> values = list.stream()
+                .limit(limit > 0 ? limit : list.size())
                 .map(Stringify::asString)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append(String.join(", ", values));
+
+        if (limit < list.size()) {
+            sb.append(String.format(" (and %s more)", list.size() - limit));
+        }
+
+        return sb.toString();
     }
+
+    private final int limit;
 }

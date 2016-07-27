@@ -22,7 +22,7 @@ public class ConditionalNamespacedElementStringifier implements Stringifier {
     public String asString(Object value) {
         final SchemaElement el = (SchemaElement)value;
 
-        return el.qname().toString();
+        return el.name() + " " + el.qname().getNamespaceURI();
     }
 
     private final Predicate<SchemaElement> pred;

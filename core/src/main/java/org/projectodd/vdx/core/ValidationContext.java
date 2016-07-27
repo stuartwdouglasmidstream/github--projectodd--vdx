@@ -175,8 +175,6 @@ public class ValidationContext {
             } catch (IOException | ParserConfigurationException | SAXException e) {
                 e.printStackTrace();
             }
-
-            System.out.println("TC: doc " + this.walkedDoc);
         }
 
         return this.walkedDoc;

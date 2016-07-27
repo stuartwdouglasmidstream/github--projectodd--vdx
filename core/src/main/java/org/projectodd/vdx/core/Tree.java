@@ -35,12 +35,12 @@ public class Tree<T> {
         return this.value == null;
     }
 
-    public Set<List<T>> pathsToValue(final Function<T, Boolean> pred) {
+    public List<List<T>> pathsToValue(final Function<T, Boolean> pred) {
         return pathsToValue(false, pred);
     }
 
-    public Set<List<T>> pathsToValue(final boolean includeValue, final Function<T, Boolean> pred) {
-        final Set<List<T>> paths = new HashSet<>();
+    public List<List<T>> pathsToValue(final boolean includeValue, final Function<T, Boolean> pred) {
+        final List<List<T>> paths = new ArrayList<>();
         if (!isRoot() && pred.apply(this.value)) {
             List<T> path = new ArrayList<>();
             if (includeValue) {
@@ -50,7 +50,7 @@ public class Tree<T> {
         }
 
         this.children().forEach(c -> {
-            final Set<List<T>> childPaths = c.pathsToValue(includeValue, pred);
+            final List<List<T>> childPaths = c.pathsToValue(includeValue, pred);
             if (!childPaths.isEmpty() &&
                     !isRoot()) {
                 childPaths.forEach(p -> p.add(0, this.value));

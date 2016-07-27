@@ -6,9 +6,9 @@ import java.util.TreeSet;
 
 import javax.xml.namespace.QName;
 
-public class Element {
+public class SchemaElement {
 
-    public Element(QName name) {
+    public SchemaElement(QName name) {
         this.name = name;
     }
 

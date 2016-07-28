@@ -6,6 +6,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 
 import org.projectodd.vdx.core.ErrorHandler;
+import org.projectodd.vdx.core.I18N;
 import org.projectodd.vdx.core.Message;
 import org.projectodd.vdx.core.SchemaElement;
 import org.projectodd.vdx.core.Util;
@@ -23,7 +24,7 @@ public class UnexpectedElementHandler implements ErrorHandler {
         Message extra = null;
 
         if (!altElements.isEmpty()) {
-            extra = new Message("'%s' is allowed in elements: %s\nDid you intend to put it in one of those elements?",
+            extra = new Message(I18N.Key.ELEMENT_IS_ALLOWED_ON,
                                 elName,
                                 altElements);
         } else {
@@ -34,16 +35,16 @@ public class UnexpectedElementHandler implements ErrorHandler {
                 final String altSpelling = Util.alternateSpelling(elName, otherElements);
 
                 if (altSpelling != null) {
-                    extra = new Message("Did you mean '%s'?", altSpelling);
+                    extra = new Message(I18N.Key.DID_YOU_MEAN, altSpelling);
                 } else {
-                    extra = new Message("elements allowed here are: %s", otherElements);
+                    extra = new Message(I18N.Key.ELEMENTS_ALLOWED_HERE, otherElements);
                 }
             }
         }
 
         return new HandledResult(loc.getLineNumber(),
                                  loc.getColumnNumber(),
-                                 new Message("'%s' isn't an allowed element here", elName),
+                                 new Message(I18N.Key.ELEMENT_NOT_ALLOWED, elName),
                                  extra);
     }
 }

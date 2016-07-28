@@ -1,20 +1,21 @@
 (ns vdx-test.handlers
-  (:require [clojure.test :refer :all]
+    (:require [clojure.test :refer :all]
             [clojure.java.io :as io])
-  (:import (org.projectodd.vdx.core.handlers
-             DuplicateAttributeHandler
-             DuplicateElementHandler
-             InvalidAttributeValueHandler
-             RequiredAttributeMissingHandler
-             RequiredElementMissingHandler
-             RequiredElementsMissingHandler
-             UnexpectedAttributeHandler
-             UnexpectedElementEndHandler
-             UnexpectedElementHandler
-             UnsupportedElementHandler)
-           (org.projectodd.vdx.core ValidationContext ValidationError ErrorType SchemaElement)
-           (javax.xml.stream Location)
-           (javax.xml.namespace QName)))
+    (:import (org.projectodd.vdx.core.handlers
+               DuplicateAttributeHandler
+               DuplicateElementHandler
+               InvalidAttributeValueHandler
+               RequiredAttributeMissingHandler
+               RequiredElementMissingHandler
+               RequiredElementsMissingHandler
+               UnexpectedAttributeHandler
+               UnexpectedElementEndHandler
+               UnexpectedElementHandler
+               UnsupportedElementHandler)
+      (org.projectodd.vdx.core ValidationContext ValidationError ErrorType SchemaElement I18N$Key)
+      (javax.xml.stream Location)
+      (javax.xml.namespace QName)
+      (java.util List)))
 
 (defn location [line col]
   (reify Location
@@ -24,7 +25,7 @@
 (defn coerce-value [v]
   (cond
     (instance? SchemaElement v) (.name v)
-    (instance? java.util.List v) (map coerce-value v)
+    (instance? List v) (map coerce-value v)
     :default v))
 
 (defn assert-message [msg template & values]
@@ -46,8 +47,8 @@
         (is (= 6 (.line res)))
         (is (= 8 (.column res)))
         (assert-message (.message res)
-          "'%s' isn't an allowed attribute for the '%s' element"
-          "biscuit" "ham")
+                        I18N$Key/ATTRIBUTE_NOT_ALLOWED
+                        "biscuit" "ham")
         (is (nil? (.extraMessage res)))))
 
     (testing "unmatchable attribute with schema alternatives"
@@ -59,8 +60,8 @@
                                            (QName. "blahblahblah")
                                            nil))]
         (assert-message (.extraMessage res)
-          "attributes allowed here are: %s"
-          ["attr1" "some-attr"])))
+                        I18N$Key/ATTRIBUTES_ALLOWED_HERE
+                        ["attr1" "some-attr"])))
 
     (testing "unmatchable attribute with provided alternatives"
       (let [res (.handle (UnexpectedAttributeHandler.)
@@ -71,7 +72,8 @@
                                            (QName. "blahblahblah")
                                            #{"abc"}))]
         (assert-message (.extraMessage res)
-          "attributes allowed here are: %s" ["abc"])))
+                        I18N$Key/ATTRIBUTES_ALLOWED_HERE
+                        ["abc"])))
 
     (testing "misspelled attribute with schema alternatives"
       (let [res (.handle (UnexpectedAttributeHandler.)
@@ -83,7 +85,8 @@
                                            nil))]
         (is (= 18 (.column res)))
         (assert-message (.extraMessage res)
-          "Did you mean '%s'?" "attr1")))
+                        I18N$Key/DID_YOU_MEAN
+                        "attr1")))
 
     (testing "misspelled attribute with provided alternatives"
       (let [res (.handle (UnexpectedAttributeHandler.)
@@ -95,7 +98,7 @@
                                            #{"attrx"}))]
         (is (= 18 (.column res)))
         (assert-message (.extraMessage res)
-         "Did you mean '%s'?" "attrx")))
+                        I18N$Key/DID_YOU_MEAN "attrx")))
 
     (testing "matchable attribute"
       (let [res (.handle (UnexpectedAttributeHandler.)
@@ -107,8 +110,8 @@
                                            nil))]
         (is (= 28 (.column res)))
         (assert-message (.extraMessage res)
-          "'%s' is allowed on elements: %s\nDid you intend to put it on one of those elements?"
-          "attr3" [["foo"]])))))
+                        I18N$Key/ATTRIBUTE_IS_ALLOWED_ON
+                        "attr3" [["foo"]])))))
 
 (deftest test-UnexpectedElementHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
@@ -124,7 +127,8 @@
         (is (= 6 (.line res)))
         (is (= 4 (.column res)))
         (assert-message (.message res)
-          "'%s' isn't an allowed element here", "ham")
+                        I18N$Key/ELEMENT_NOT_ALLOWED
+                        "ham")
         (is (nil? (.extraMessage res)))))
 
     (testing "unmatchable element with provided alternatives"
@@ -135,7 +139,8 @@
                                            (QName. "urn:vdx:test" "ham")
                                            #{"abcdefg"}))]
         (assert-message (.extraMessage res)
-          "elements allowed here are: %s" ["abcdefg"])))
+                        I18N$Key/ELEMENTS_ALLOWED_HERE
+                        ["abcdefg"])))
 
     (testing "misspelled element with provided alternatives"
       (let [res (.handle (UnexpectedElementHandler.)
@@ -145,7 +150,8 @@
                                            (QName. "urn:vdx:test" "ham")
                                            #{"abc"}))]
         (assert-message (.extraMessage res)
-          "Did you mean '%s'?" "abc")))
+                        I18N$Key/DID_YOU_MEAN
+                        "abc")))
 
     (testing "matchable element"
       (let [res (.handle (UnexpectedElementHandler.)
@@ -155,5 +161,5 @@
                                            (QName. "urn:vdx:test" "sandwich")
                                            nil))]
         (assert-message (.extraMessage res)
-          "'%s' is allowed in elements: %s\nDid you intend to put it in one of those elements?"
-          "sandwich" [["foo" "bar" "sandwiches"] ["omelet" "sandwiches"]])))))
+                        I18N$Key/ELEMENT_IS_ALLOWED_ON
+                        "sandwich" [["foo" "bar" "sandwiches"] ["omelet" "sandwiches"]])))))

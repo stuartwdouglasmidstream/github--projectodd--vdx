@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Message {
-    public Message(String template, Object... values) {
+    public Message(final I18N.Key template, final Object... values) {
         this.template = template;
         this.values = Arrays.asList(values);
     }
@@ -21,15 +21,15 @@ public class Message {
                 .collect(Collectors.toList());
     }
 
-    public String template() {
+    public I18N.Key template() {
         return this.template;
     }
 
     @Override
     public String toString() {
-        return String.format(this.template, stringValues().toArray());
+        return I18N.format(this.template, stringValues().toArray());
     }
 
-    private final String template;
+    private final I18N.Key template;
     private final List<Object> values;
 }

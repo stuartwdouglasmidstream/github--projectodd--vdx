@@ -3,6 +3,7 @@ package org.projectodd.vdx.core.handlers;
 import javax.xml.stream.Location;
 
 import org.projectodd.vdx.core.ErrorHandler;
+import org.projectodd.vdx.core.I18N;
 import org.projectodd.vdx.core.Message;
 import org.projectodd.vdx.core.ValidationContext;
 import org.projectodd.vdx.core.ValidationError;
@@ -16,7 +17,7 @@ public class DuplicateAttributeHandler implements ErrorHandler {
 
         return new HandledResult(loc.getLineNumber(),
                                  loc.getColumnNumber(),
-                                 new Message("'%s' can't appear more than once on the '%s' element", attr, el),
+                                 new Message(I18N.Key.ATTRIBUTE_DUPLICATED, attr, el),
                                  null);
     }
 }

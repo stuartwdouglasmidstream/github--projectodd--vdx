@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import javax.xml.stream.Location;
 
 import org.projectodd.vdx.core.ErrorHandler;
+import org.projectodd.vdx.core.I18N;
 import org.projectodd.vdx.core.Message;
 import org.projectodd.vdx.core.SchemaElement;
 import org.projectodd.vdx.core.Util;
@@ -27,9 +28,7 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
         Message extra = null;
 
         if (!altElements.isEmpty()) {
-            extra = new Message("'%s' is allowed on elements: %s\nDid you intend to put it on one of those elements?",
-                                attr,
-                                altElements);
+            extra = new Message(I18N.Key.ATTRIBUTE_IS_ALLOWED_ON, attr, altElements);
         } else {
             final List<String> otherAttributes = Util.asSortedList(error.alternatives() != null ?
                                                                            error.alternatives() :
@@ -38,16 +37,16 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
                 final String altSpelling = Util.alternateSpelling(attr, otherAttributes);
 
                 if (altSpelling != null) {
-                    extra = new Message("Did you mean '%s'?", altSpelling);
+                    extra = new Message(I18N.Key.DID_YOU_MEAN, altSpelling);
                 } else {
-                    extra = new Message("attributes allowed here are: %s", otherAttributes);
+                    extra = new Message(I18N.Key.ATTRIBUTES_ALLOWED_HERE, otherAttributes);
                 }
             }
         }
 
         return new HandledResult(pos != null ? pos.line : loc.getLineNumber(),
                                  pos != null ? pos.col : loc.getColumnNumber(),
-                                 new Message("'%s' isn't an allowed attribute for the '%s' element", attr, el),
+                                 new Message(I18N.Key.ATTRIBUTE_NOT_ALLOWED, attr, el),
                                  extra);
     }
 }

@@ -3,7 +3,6 @@ package org.projectodd.vdx.core.handlers;
 import java.util.List;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.Location;
 
 import org.projectodd.vdx.core.ErrorHandler;
 import org.projectodd.vdx.core.I18N;
@@ -16,7 +15,6 @@ import org.projectodd.vdx.core.ValidationError;
 public class UnexpectedElementHandler implements ErrorHandler {
     @Override
     public HandledResult handle(ValidationContext ctx, ValidationError error) {
-        final Location loc = error.location();
         final QName el = error.element();
         final String elName = el.getLocalPart();
         final List<List<SchemaElement>> altElements = ctx.alternateElementsForElement(el);
@@ -42,9 +40,8 @@ public class UnexpectedElementHandler implements ErrorHandler {
             }
         }
 
-        return new HandledResult(loc.getLineNumber(),
-                                 loc.getColumnNumber(),
-                                 new Message(I18N.Key.ELEMENT_NOT_ALLOWED, elName),
-                                 extra);
+        return HandledResult.from(error)
+                .message(I18N.Key.ELEMENT_NOT_ALLOWED, elName)
+                .extraMessage(extra);
     }
 }

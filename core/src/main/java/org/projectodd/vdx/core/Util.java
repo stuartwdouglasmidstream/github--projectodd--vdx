@@ -75,6 +75,14 @@ public class Util {
         return null;
     }
 
+    public static String withPrefix(final String prefix, final String v) {
+        return String.join("\n",
+                           Arrays.stream(v.split("\\n"))
+                                   .map(x -> String.format("%s%s", prefix, x))
+                                   .collect(Collectors.toList()));
+
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> List<T> asSortedList(Collection<? extends T> col) {
         if (col == null) {
@@ -90,12 +98,6 @@ public class Util {
         return String.join(" > ", path);
     }
 
-    public static String pathsToString(Collection<List<String>> paths) {
-        return String.join(", ", paths.stream()
-                .map(Util::pathToString)
-                .sorted()
-                .collect(Collectors.toList()));
-    }
 
     // from https://git-wip-us.apache.org/repos/asf?p=commons-lang.git;a=blob;f=src/main/java/org/apache/commons/lang3/StringUtils.java;h=9bc6396575dc0df33ec224fe14bc483df0b9d8d3;hb=HEAD
 

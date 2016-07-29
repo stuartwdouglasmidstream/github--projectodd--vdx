@@ -11,13 +11,10 @@ import org.projectodd.vdx.core.ValidationError;
 public class DuplicateAttributeHandler implements ErrorHandler {
     @Override
     public HandledResult handle(ValidationContext ctx, ValidationError error) {
-        final Location loc = error.location();
         final String attr = error.attribute().getLocalPart();
         final String el = error.element().getLocalPart();
 
-        return new HandledResult(loc.getLineNumber(),
-                                 loc.getColumnNumber(),
-                                 new Message(I18N.Key.ATTRIBUTE_DUPLICATED, attr, el),
-                                 null);
+        return HandledResult.from(error)
+                .message(I18N.Key.ATTRIBUTE_DUPLICATED, attr, el);
     }
 }

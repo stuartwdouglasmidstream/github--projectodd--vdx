@@ -11,11 +11,14 @@ public class I18N {
         ATTRIBUTE_NOT_ALLOWED,
         ATTRIBUTES_ALLOWED_HERE,
 
+        DID_YOU_MEAN,
+
         ELEMENT_IS_ALLOWED_ON,
         ELEMENT_NOT_ALLOWED,
         ELEMENTS_ALLOWED_HERE,
 
-        DID_YOU_MEAN,
+        ORIGINAL_ERROR,
+        PASSTHRU,
         VALIDATION_ERROR_IN;
 
         @Override

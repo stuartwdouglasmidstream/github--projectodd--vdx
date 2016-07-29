@@ -23,7 +23,7 @@ public class ErrorPrinter {
         final ErrorHandler.HandledResult res = this.context.handle(error);
 
         if (res != null) {
-            final int linum = res.line;
+            final int linum = res.line();
             final int maxLinumWidth = ("" + linum + CONTEXT_LINES).length();
             final String[] docPathParts = docURL.getPath().split(File.separator);
 
@@ -33,14 +33,19 @@ public class ErrorPrinter {
                     .append('\n')
                     .append(prefixLines(linum, maxLinumWidth))
                     .append('\n')
-                    .append(leftPad(maxLinumWidth + res.column + 1, "^ " + res.message.toString()))
+                    .append(leftPad(maxLinumWidth + res.column() + 1, "^ " + res.message().toString()))
                     .append("\n\n")
                     .append(postfixLines(linum, maxLinumWidth))
                     .append('\n');
 
-            if (res.extraMessage != null) {
-                out.append(res.extraMessage.toString())
+            if (res.extraMessage() != null) {
+                out.append(res.extraMessage().toString())
                         .append("\n\n");
+            }
+
+            if (res.originalMessage() != null) {
+                out.append(I18N.lookup(I18N.Key.ORIGINAL_ERROR)).append("\n")
+                        .append(Util.withPrefix("> ", res.originalMessage())).append("\n\n");
             }
 
             out.append(divider())
@@ -78,7 +83,8 @@ public class ErrorPrinter {
     private String postfixLines(final int linum, final int maxLinumWidth) {
         return extractLines(maxLinumWidth,
                             linum,
-                            CONTEXT_LINES + linum > this.context.documentLineCount() ?  this.context.documentLineCount() : linum + CONTEXT_LINES);
+                            CONTEXT_LINES + linum > this.context.documentLineCount() ?
+                                    this.context.documentLineCount() : linum + CONTEXT_LINES);
     }
 
 

@@ -44,9 +44,14 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
             }
         }
 
-        return new HandledResult(pos != null ? pos.line : loc.getLineNumber(),
-                                 pos != null ? pos.col : loc.getColumnNumber(),
-                                 new Message(I18N.Key.ATTRIBUTE_NOT_ALLOWED, attr, el),
-                                 extra);
+        final HandledResult result = HandledResult.from(error)
+                .message(I18N.Key.ATTRIBUTE_NOT_ALLOWED, attr, el)
+                .extraMessage(extra);
+
+        if (pos != null) {
+            result.line(pos.line).column(pos.col);
+        }
+
+        return result;
     }
 }

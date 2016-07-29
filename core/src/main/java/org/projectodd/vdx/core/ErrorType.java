@@ -9,6 +9,7 @@ import org.projectodd.vdx.core.handlers.RequiredElementsMissingHandler;
 import org.projectodd.vdx.core.handlers.UnexpectedAttributeHandler;
 import org.projectodd.vdx.core.handlers.UnexpectedElementEndHandler;
 import org.projectodd.vdx.core.handlers.UnexpectedElementHandler;
+import org.projectodd.vdx.core.handlers.UnknownErrorHandler;
 import org.projectodd.vdx.core.handlers.UnsupportedElementHandler;
 
 public enum ErrorType {
@@ -21,6 +22,7 @@ public enum ErrorType {
     UNEXPECTED_ATTRIBUTE(UnexpectedAttributeHandler.class),
     UNEXPECTED_ELEMENT(UnexpectedElementHandler.class),
     UNEXPECTED_ELEMENT_END(UnexpectedElementEndHandler.class),
+    UNKNOWN_ERROR(UnknownErrorHandler.class),
     UNSUPPORTED_ELEMENT(UnsupportedElementHandler.class);
 
     private final Class<? extends ErrorHandler> handlerClass;

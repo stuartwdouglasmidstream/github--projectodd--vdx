@@ -2,6 +2,8 @@ package org.projectodd.vdx.core;
 
 import java.util.function.Predicate;
 
+import org.projectodd.vdx.core.schema.SchemaElement;
+
 public class ConditionalNamespacedElementStringifier implements Stringifier {
     public ConditionalNamespacedElementStringifier(final Predicate<SchemaElement> pred) {
         this.pred = pred;

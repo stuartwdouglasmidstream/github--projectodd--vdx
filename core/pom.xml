@@ -15,13 +15,6 @@
 
   <description>VDX Core utils</description>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.ws.xmlschema</groupId>
-      <artifactId>xmlschema-walker</artifactId>
-    </dependency>
-  </dependencies>
-
   <build>
     <plugins>
       <plugin>

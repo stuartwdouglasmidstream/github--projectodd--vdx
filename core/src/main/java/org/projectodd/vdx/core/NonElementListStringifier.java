@@ -3,6 +3,8 @@ package org.projectodd.vdx.core;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.projectodd.vdx.core.schema.SchemaElement;
+
 public class NonElementListStringifier implements Stringifier {
 
     public NonElementListStringifier(final int limit) {

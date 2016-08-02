@@ -7,7 +7,7 @@ import javax.xml.namespace.QName;
 import org.projectodd.vdx.core.ErrorHandler;
 import org.projectodd.vdx.core.I18N;
 import org.projectodd.vdx.core.Message;
-import org.projectodd.vdx.core.SchemaElement;
+import org.projectodd.vdx.core.schema.SchemaElement;
 import org.projectodd.vdx.core.Util;
 import org.projectodd.vdx.core.ValidationContext;
 import org.projectodd.vdx.core.ValidationError;

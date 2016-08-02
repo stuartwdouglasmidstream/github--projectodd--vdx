@@ -8,7 +8,7 @@ import javax.xml.stream.Location;
 import org.projectodd.vdx.core.ErrorHandler;
 import org.projectodd.vdx.core.I18N;
 import org.projectodd.vdx.core.Message;
-import org.projectodd.vdx.core.SchemaElement;
+import org.projectodd.vdx.core.schema.SchemaElement;
 import org.projectodd.vdx.core.Util;
 import org.projectodd.vdx.core.ValidationContext;
 import org.projectodd.vdx.core.ValidationError;
@@ -30,7 +30,7 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
         if (!altElements.isEmpty()) {
             extra = new Message(I18N.Key.ATTRIBUTE_IS_ALLOWED_ON, attr, altElements);
         } else {
-            final List<String> otherAttributes = Util.asSortedList(error.alternatives() != null ?
+            final List<String> otherAttributes = Util.asSortedList(!error.alternatives().isEmpty() ?
                                                                            error.alternatives() :
                                                                            ctx.attributesForElement(error.element()));
             if (!otherAttributes.isEmpty()) {

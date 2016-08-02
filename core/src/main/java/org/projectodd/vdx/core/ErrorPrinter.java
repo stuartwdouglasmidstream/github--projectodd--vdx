@@ -6,12 +6,12 @@ import java.net.URL;
 import java.util.List;
 
 public class ErrorPrinter {
-    public ErrorPrinter(final URL document, final URL baseUrl, final List<URL> schemas) throws IOException {
-        this(document, baseUrl, schemas, Printer.DEFAULT_PRINTER, null);
+    public ErrorPrinter(final URL document, final List<URL> schemas) throws IOException {
+        this(document, schemas, Printer.DEFAULT_PRINTER, null);
     }
 
-    public ErrorPrinter(final URL document, final URL baseUrl, final List<URL> schemas, final Printer printer, final List<Stringifier> stringifiers) throws IOException {
-        this.context = new ValidationContext(document, baseUrl, schemas);
+    public ErrorPrinter(final URL document, final List<URL> schemas, final Printer printer, final List<Stringifier> stringifiers) throws IOException {
+        this.context = new ValidationContext(document, schemas);
         this.docURL = document;
         this.printer = printer;
         if (stringifiers != null) {

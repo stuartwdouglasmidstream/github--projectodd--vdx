@@ -13,7 +13,8 @@
                UnexpectedElementHandler
                UnsupportedElementHandler
                UnknownErrorHandler)
-      (org.projectodd.vdx.core ValidationContext ValidationError ErrorType SchemaElement I18N$Key)
+      (org.projectodd.vdx.core ValidationContext ValidationError ErrorType I18N$Key)
+      (org.projectodd.vdx.core.schema SchemaElement)
       (javax.xml.stream Location)
       (javax.xml.namespace QName)
       (java.util List)))
@@ -35,7 +36,6 @@
 
 (deftest test-UnexpectedAttributeHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
-                                (io/resource "schemas")
                                 [(io/resource "schemas/handler-test.xsd")])]
     (testing "unmatchable attribute with no alternates"
       (let [res (.handle (UnexpectedAttributeHandler.)
@@ -118,7 +118,6 @@
 
 (deftest test-UnexpectedElementHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
-                                (io/resource "schemas")
                                 [(io/resource "schemas/handler-test.xsd")])]
     (testing "unmatchable element with no alternates"
       (let [res (.handle (UnexpectedElementHandler.)
@@ -171,7 +170,6 @@
 
 (deftest test-UnknownErrorHandler
          (let [ctx (ValidationContext. (io/resource "handler-test.xml")
-                                       (io/resource "schemas")
                                        [(io/resource "schemas/handler-test.xsd")])]
               (let [res (.handle (UnknownErrorHandler.)
                                  ctx

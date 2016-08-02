@@ -4,17 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -26,18 +21,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.ws.commons.schema.XmlSchemaAll;
-import org.apache.ws.commons.schema.XmlSchemaAny;
-import org.apache.ws.commons.schema.XmlSchemaAnyAttribute;
-import org.apache.ws.commons.schema.XmlSchemaChoice;
-import org.apache.ws.commons.schema.XmlSchemaCollection;
-import org.apache.ws.commons.schema.XmlSchemaElement;
-import org.apache.ws.commons.schema.XmlSchemaException;
-import org.apache.ws.commons.schema.XmlSchemaSequence;
-import org.apache.ws.commons.schema.walker.XmlSchemaAttrInfo;
-import org.apache.ws.commons.schema.walker.XmlSchemaTypeInfo;
-import org.apache.ws.commons.schema.walker.XmlSchemaVisitor;
-import org.apache.ws.commons.schema.walker.XmlSchemaWalker;
+import org.projectodd.vdx.core.schema.SchemaElement;
+import org.projectodd.vdx.core.schema.SchemaWalker;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -46,22 +31,16 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class ValidationContext {
-    public ValidationContext(final URL document, final URL baseUrl, final List<URL> schemas) throws IOException {
+    public ValidationContext(final URL document, final List<URL> schemas) throws IOException {
         this.document = document;
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(document.openStream()))) {
             this.lines = reader.lines().collect(Collectors.toList());
         }
-        this.schemas.setBaseUri(baseUrl.toString());
+
         final Set<String> xmlnses = Util.extractXMLNS(this.lines);
         for (URL url : schemas) {
-            try {
-                if (Util.providesXMLNS(xmlnses, url)) {
-                    try (final Reader reader = new InputStreamReader(url.openStream())) {
-                        this.schemas.read(reader);
-                    }
-                }
-            } catch (XmlSchemaException e) {
-                System.out.println(e.getMessage());
+            if (Util.providesXMLNS(xmlnses, url)) {
+                this.schemas.add(url);
             }
         }
     }
@@ -157,9 +136,7 @@ public class ValidationContext {
             final ContentHandler handler = new DefaultHandler() {
                 @Override
                 public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-                    final Tree<String> el = new Tree<>(qName);
-                    stack.peek().addChild(el);
-                    stack.push(el);
+                    stack.push(stack.peek().addChild(qName));
                 }
 
                 @Override
@@ -184,93 +161,10 @@ public class ValidationContext {
     }
 
     private Tree<SchemaElement> walkSchemas() {
+
+
         if (this.walkedSchemas == null) {
-            this.walkedSchemas = new Tree<>();
-            final Deque<Tree <SchemaElement>> stack = new ArrayDeque<>();
-            final Map<QName, Tree<SchemaElement>> elementCache = new HashMap<>();
-
-            stack.push(this.walkedSchemas);
-
-            final XmlSchemaWalker walker = new XmlSchemaWalker(this.schemas, new XmlSchemaVisitor() {
-                @Override
-                public void onEnterElement(XmlSchemaElement element, XmlSchemaTypeInfo typeInfo, boolean previouslyVisited) {
-                    final QName qName = element.getQName();
-                    Tree<SchemaElement> el = elementCache.get(qName);
-                    if (el == null) {
-                        el = new Tree<>(new SchemaElement(qName));
-                        elementCache.put(qName, el);
-                    }
-                    stack.peek().addChild(el);
-                    stack.push(el);
-                }
-
-                @Override
-                public void onExitElement(XmlSchemaElement element, XmlSchemaTypeInfo typeInfo, boolean previouslyVisited) {
-                    stack.pop();
-                }
-
-                @Override
-                public void onVisitAttribute(XmlSchemaElement element, XmlSchemaAttrInfo attrInfo) {
-                    stack.peek().value().addAttribute(attrInfo.getAttribute().getName());
-                }
-
-                @Override
-                public void onEndAttributes(XmlSchemaElement element, XmlSchemaTypeInfo typeInfo) {
-
-                }
-
-                @Override
-                public void onEnterSubstitutionGroup(XmlSchemaElement base) {
-
-                }
-
-                @Override
-                public void onExitSubstitutionGroup(XmlSchemaElement base) {
-
-                }
-
-                @Override
-                public void onEnterAllGroup(XmlSchemaAll all) {
-
-                }
-
-                @Override
-                public void onExitAllGroup(XmlSchemaAll all) {
-
-                }
-
-                @Override
-                public void onEnterChoiceGroup(XmlSchemaChoice choice) {
-
-                }
-
-                @Override
-                public void onExitChoiceGroup(XmlSchemaChoice choice) {
-
-                }
-
-                @Override
-                public void onEnterSequenceGroup(XmlSchemaSequence seq) {
-
-                }
-
-                @Override
-                public void onExitSequenceGroup(XmlSchemaSequence seq) {
-
-                }
-
-                @Override
-                public void onVisitAny(XmlSchemaAny any) {
-
-                }
-
-                @Override
-                public void onVisitAnyAttribute(XmlSchemaElement element, XmlSchemaAnyAttribute anyAttr) {
-
-                }
-            });
-
-            Arrays.stream(this.schemas.getXmlSchemas()).forEach(s -> s.getElements().values().forEach(walker::walk));
+            this.walkedSchemas = new SchemaWalker(this.schemas).walk();
         }
 
         return this.walkedSchemas;
@@ -278,7 +172,7 @@ public class ValidationContext {
 
     private final URL document;
     private final List<String> lines;
-    private final XmlSchemaCollection schemas = new XmlSchemaCollection();
+    private final List<URL> schemas = new ArrayList<>();
     private Tree<SchemaElement> walkedSchemas = null;
     private Tree<String> walkedDoc = null;
 

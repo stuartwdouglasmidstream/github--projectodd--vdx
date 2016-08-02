@@ -1,6 +1,6 @@
 package org.projectodd.vdx.core;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
@@ -74,7 +74,7 @@ public class ValidationError {
     }
 
     public ValidationError alternatives(final Set<String> alternatives) {
-        this.alternatives = Collections.unmodifiableSet(alternatives);
+        this.alternatives.addAll(alternatives);
 
         return this;
     }
@@ -86,6 +86,6 @@ public class ValidationError {
     private QName element = null;
     private QName attribute = null;
     private String attributeValue = null;
-    private Set<String> alternatives = null;
+    private final Set<String> alternatives = new HashSet<>();
 
 }

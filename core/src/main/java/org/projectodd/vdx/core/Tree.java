@@ -13,14 +13,18 @@ public class Tree<T> {
         this(null);
     }
 
-    Tree(final T value) {
+    public Tree(final T value) {
         this.value = value;
     }
 
     public Tree<T> addChild(Tree<T> child) {
         this.children.add(child);
 
-        return this;
+        return child;
+    }
+
+    public Tree<T> addChild(T child) {
+        return addChild(new Tree<>(child));
     }
 
     public T value() {
@@ -84,6 +88,25 @@ public class Tree<T> {
     public String toString() {
         return "<value=" + this.value +
                 ", children=" + this.children + ">";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (this == obj) return true;
+        if (!(obj instanceof Tree)) return false;
+
+        final Tree that = (Tree) obj;
+
+        return !((this.isRoot() && !that.isRoot()) || (!this.isRoot() && that.isRoot()))
+                && !(!this.isRoot() && !this.value.equals(that.value))
+                && this.children.equals(that.children);
+    }
+
+    @Override
+    public int hashCode() {
+        return (this.isRoot() ? 0 : this.value.hashCode()) +
+                this.children.hashCode();
     }
 
     public static void reduceComplete(Object result) {

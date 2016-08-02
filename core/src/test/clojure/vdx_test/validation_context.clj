@@ -7,6 +7,5 @@
 
 (deftest attributesForElement-should-work
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
-                                (io/resource "schemas")
                                 [(io/resource "schemas/handler-test.xsd")])]
     (is (= #{"attr1" "some-attr"} (.attributesForElement ctx (QName. "urn:vdx:test" "bar"))))))

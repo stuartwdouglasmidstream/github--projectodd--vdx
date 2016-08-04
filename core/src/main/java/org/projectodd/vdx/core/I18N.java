@@ -10,6 +10,7 @@ public class I18N {
         ATTRIBUTE_IS_ALLOWED_ON,
         ATTRIBUTE_NOT_ALLOWED,
         ATTRIBUTES_ALLOWED_HERE,
+        ATTRIBUTE_INVALID_VALUE,
 
         BLANK,
 

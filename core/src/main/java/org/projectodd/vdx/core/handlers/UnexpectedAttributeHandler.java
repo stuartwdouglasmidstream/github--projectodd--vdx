@@ -8,6 +8,7 @@ import javax.xml.stream.Location;
 import org.projectodd.vdx.core.ErrorHandler;
 import org.projectodd.vdx.core.I18N;
 import org.projectodd.vdx.core.Message;
+import org.projectodd.vdx.core.Position;
 import org.projectodd.vdx.core.schema.SchemaElement;
 import org.projectodd.vdx.core.Util;
 import org.projectodd.vdx.core.ValidationContext;
@@ -21,8 +22,8 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
         final Location loc = error.location();
         final String attr = error.attribute().getLocalPart();
         final String el = error.element().getLocalPart();
-        final ValidationContext.Position pos = ctx.searchForward(loc.getLineNumber() - 1, loc.getColumnNumber(),
-                                                                 Pattern.compile(attr + "\\s*="));
+        final Position pos = ctx.searchForward(loc.getLineNumber() - 1, loc.getColumnNumber(),
+                                               Pattern.compile(attr + "\\s*="));
         final List<List<SchemaElement>> altElements = ctx.alternateElementsForAttribute(attr);
 
         Message extra = null;

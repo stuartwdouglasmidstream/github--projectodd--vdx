@@ -6,7 +6,7 @@ public interface ErrorHandler {
     HandledResult handle(ValidationContext ctx, ValidationError err);
 
     class HandledResult {
-        private HandledResult(final int line, final int column, final String originalMessage) {
+        public HandledResult(final int line, final int column, final String originalMessage) {
             this.line = line;
             this.column = column;
             this.originalMessage = originalMessage;
@@ -46,6 +46,16 @@ public interface ErrorHandler {
             return extraMessage(new Message(key, args));
         }
 
+        public HandledResult extraResult() {
+            return extraResult;
+        }
+
+        public HandledResult extraResult(final HandledResult extraResult) {
+            this.extraResult = extraResult;
+
+            return this;
+        }
+
         public int line() {
             return line;
         }
@@ -75,8 +85,9 @@ public interface ErrorHandler {
         private int line;
         private int column;
         private final String originalMessage;
-        private Message message;
-        private Message extraMessage;
+        private Message message = null;
+        private Message extraMessage = null;
+        private HandledResult extraResult = null;
     }
 
 }

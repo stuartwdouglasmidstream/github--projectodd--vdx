@@ -2,12 +2,9 @@ package org.projectodd.vdx.core;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,18 +14,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.xml.namespace.QName;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
 import org.projectodd.vdx.core.schema.SchemaElement;
 import org.projectodd.vdx.core.schema.SchemaWalker;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
 
 public class ValidationContext {
     public ValidationContext(final URL document, final List<URL> schemas) throws IOException {
@@ -70,8 +58,8 @@ public class ValidationContext {
         return alternateElements(false, el -> el.qname().equals(element));
     }
 
-    protected List<List<SchemaElement>> alternateElements(final boolean includeValue, final Function<SchemaElement, Boolean> pred) {
-        return walkSchemas().pathsToValue(includeValue, pred)
+    private List<List<SchemaElement>> alternateElements(final boolean includeValue, final Function<SchemaElement, Boolean> pred) {
+        return schemaTree().pathsToValue(includeValue, pred)
                 .stream()
                 .map(this::docPathWithPrefix)
                 .collect(Collectors.toList());
@@ -84,11 +72,11 @@ public class ValidationContext {
      */
     private List<SchemaElement> docPathWithPrefix(final List<SchemaElement> path) {
         final List<SchemaElement> fullPath = new ArrayList<>();
-        final List<List<String>> prefixPaths = walkDoc().pathsToValue(e -> e.equals(path.get(0).name()));
+        final List<List<DocElement>> prefixPaths = documentTree().pathsToValue(e -> e.name().equals(path.get(0).name()));
 
         if (!prefixPaths.isEmpty()) {
             fullPath.addAll(prefixPaths.get(0).stream()
-                                    .map(e -> new SchemaElement(QName.valueOf(e)))
+                                    .map(e -> new SchemaElement(QName.valueOf(e.name())))
                                     .collect(Collectors.toList()));
         }
 
@@ -99,7 +87,7 @@ public class ValidationContext {
 
     @SuppressWarnings("unchecked")
     public Set<String> attributesForElement(final QName elName) {
-        return walkSchemas().reduce(new HashSet<>(), (accum, el) -> {
+        return schemaTree().reduce(new HashSet<>(), (accum, el) -> {
                 if (el.qname().equals(elName)) {
                     accum.addAll(el.attributes());
                     Tree.reduceComplete(accum);
@@ -127,40 +115,19 @@ public class ValidationContext {
         }
     }
 
-    private Tree<String> walkDoc() {
+    public List<List<DocElement>> pathsToDocElement(final Function<DocElement, Boolean> pred) {
+        return documentTree().pathsToValue(true, pred);
+    }
+
+    private Tree<DocElement> documentTree() {
         if (this.walkedDoc == null) {
-            this.walkedDoc = new Tree<>();
-            final Deque<Tree <String>> stack = new ArrayDeque<>();
-            stack.push(this.walkedDoc);
-
-            final ContentHandler handler = new DefaultHandler() {
-                @Override
-                public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-                    stack.push(stack.peek().addChild(qName));
-                }
-
-                @Override
-                public void endElement(String uri, String localName, String qName) throws SAXException {
-                    stack.pop();
-                }
-            };
-
-            try (final InputStream in = this.document.openStream()) {
-                final SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-
-                final XMLReader reader = parser.getXMLReader();
-                //reader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
-                reader.setContentHandler(handler);
-                reader.parse(new InputSource(in));
-            } catch (IOException | ParserConfigurationException | SAXException e) {
-                e.printStackTrace();
-            }
+            this.walkedDoc = new DocWalker(this.document).walk();
         }
 
         return this.walkedDoc;
     }
 
-    private Tree<SchemaElement> walkSchemas() {
+    private Tree<SchemaElement> schemaTree() {
 
 
         if (this.walkedSchemas == null) {
@@ -174,16 +141,5 @@ public class ValidationContext {
     private final List<String> lines;
     private final List<URL> schemas = new ArrayList<>();
     private Tree<SchemaElement> walkedSchemas = null;
-    private Tree<String> walkedDoc = null;
-
-
-    public class Position {
-        public final int line;
-        public final int col;
-
-        public Position(int line, int col) {
-            this.line = line;
-            this.col = col;
-        }
-    }
+    private Tree<DocElement> walkedDoc = null;
 }

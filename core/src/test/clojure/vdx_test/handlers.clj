@@ -32,7 +32,26 @@
 
 (defn assert-message [msg template & values]
   (is (= template (.template msg)))
-  (is (= values (map coerce-value (.rawValues msg)))))
+  (is (= (or values []) (map coerce-value (.rawValues msg)))))
+
+(deftest test-DuplicateElementHandler
+  (let [ctx (ValidationContext. (io/resource "handler-test.xml")
+              [(io/resource "schemas/handler-test.xsd")])]
+    (let [res (.handle (DuplicateElementHandler.)
+                ctx
+                (-> (ValidationError. ErrorType/DUPLICATE_ELEMENT
+                      ""
+                      (location 1 1))
+                  (.element (QName. "urn:vdx:test" "bar"))
+                  (.attribute (QName. "attr1"))
+                  (.attributeValue "a")))]
+      (assert-message (.message res)
+        I18N$Key/ELEMENT_DUPLICATED "bar" "attr1" "a")
+      (assert-message (.extraMessage res)
+        I18N$Key/ELEMENT_DUPLICATED_FIRST_OCCURRENCE "bar" "attr1")
+      (is (.extraResult res))
+      (assert-message (.message (.extraResult res))
+        I18N$Key/BLANK))))
 
 (deftest test-UnexpectedAttributeHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
@@ -179,3 +198,4 @@
                   (.fallbackMessage "bar")))]
       (assert-message (.message res)
         I18N$Key/PASSTHRU "bar"))))
+

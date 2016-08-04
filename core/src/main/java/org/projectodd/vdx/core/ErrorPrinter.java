@@ -23,35 +23,48 @@ public class ErrorPrinter {
         final ErrorHandler.HandledResult res = this.context.handle(error);
 
         if (res != null) {
-            final int linum = res.line();
-            final int maxLinumWidth = ("" + linum + CONTEXT_LINES).length();
             final String[] docPathParts = docURL.getPath().split(File.separator);
 
             final StringBuilder out = new StringBuilder()
                     .append('\n')
-                    .append(divider(I18N.format(I18N.Key.VALIDATION_ERROR_IN, docPathParts[docPathParts.length - 1])))
-                    .append('\n')
-                    .append(prefixLines(linum, maxLinumWidth))
-                    .append('\n')
-                    .append(leftPad(maxLinumWidth + res.column() + 1, "^ " + res.message().toString()))
-                    .append("\n\n")
-                    .append(postfixLines(linum, maxLinumWidth))
-                    .append('\n');
+                    .append(divider(I18N.format(I18N.Key.VALIDATION_ERROR_IN, docPathParts[docPathParts.length - 1])));
 
-            if (res.extraMessage() != null) {
-                out.append(res.extraMessage().toString())
-                        .append("\n\n");
-            }
-
-            if (res.originalMessage() != null) {
-                out.append(I18N.lookup(I18N.Key.ORIGINAL_ERROR)).append("\n")
-                        .append(Util.withPrefix("> ", res.originalMessage())).append("\n\n");
-            }
+            formatResult(out, res);
 
             out.append(divider())
                     .append('\n');
 
             this.printer.println(out.toString());
+        }
+    }
+
+    private void formatResult(final StringBuilder out, final ErrorHandler.HandledResult result) {
+        final int linum = result.line();
+        final int maxLinumWidth = ("" + linum + CONTEXT_LINES).length();
+
+        out.append('\n')
+                .append(prefixLines(linum, maxLinumWidth))
+                .append('\n')
+                .append(leftPad(maxLinumWidth + result.column() + 1, "^ " +
+                        (result.message() != null ? result.message().toString() : "")))
+                .append("\n\n")
+                .append(postfixLines(linum, maxLinumWidth))
+                .append('\n');
+
+        if (result.extraMessage() != null) {
+            out.append(result.extraMessage().toString())
+                    .append("\n");
+        }
+
+        if (result.extraResult() != null) {
+            formatResult(out, result.extraResult());
+        } else {
+            out.append("\n");
+        }
+
+        if (result.originalMessage() != null) {
+            out.append(I18N.lookup(I18N.Key.ORIGINAL_ERROR)).append("\n")
+                    .append(Util.withPrefix("> ", result.originalMessage())).append("\n\n");
         }
     }
 

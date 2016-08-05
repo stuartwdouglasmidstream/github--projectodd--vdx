@@ -9,7 +9,6 @@
              RequiredElementMissingHandler
              RequiredElementsMissingHandler
              UnexpectedAttributeHandler
-             UnexpectedElementEndHandler
              UnexpectedElementHandler
              UnsupportedElementHandler
              UnknownErrorHandler)

@@ -98,21 +98,50 @@ public class ValidationContext {
     }
 
     public Position searchForward(final int startLine, final int startCol, final Pattern regex) {
-        if (startLine < this.lines.size()) {
-            final String line = this.lines.get(startLine);
+        int loopStartLine = startLine;
+        int loopStartCol = startCol;
+        while (loopStartLine < this.lines.size()) {
+            final String line = this.lines.get(loopStartLine);
             final Matcher matcher = regex.matcher(line);
-            if (matcher.find(startCol)) {
+
+            if (loopStartCol < line.length() &&
+                    matcher.find(loopStartCol)) {
 
                 // return next line, since we're zero indexed here, but 1 indexed for lines
-                return new Position(startLine + 1, matcher.start() + 1);
+                return new Position(loopStartLine + 1, matcher.start() + 1);
             } else {
-
-                return searchForward(startLine + 1, 0, regex);
+                loopStartLine++;
+                loopStartCol = 0;
             }
-        } else {
-
-            return null;
         }
+
+        return null;
+    }
+
+    public Position searchBackward(final int startLine, final int startCol, final Pattern regex) {
+        int loopStartLine = startLine;
+        int loopStartCol = startCol;
+        while (loopStartLine >= 0) {
+            final String line = this.lines.get(loopStartLine);
+            final Matcher matcher = regex.matcher(line);
+            if (loopStartCol >= line.length()) {
+                loopStartCol = line.length() - 1;
+            }
+
+            if (loopStartCol >= 0 &&
+                    matcher.find(loopStartCol)) {
+
+                // return next line, since we're zero indexed here, but 1 indexed for lines
+                return new Position(loopStartLine + 1, matcher.start() + 1);
+            } else if (loopStartCol > 0) {
+                loopStartCol--;
+            } else {
+                loopStartLine--;
+                loopStartCol = Integer.MAX_VALUE;
+            }
+        }
+
+        return null;
     }
 
     public List<List<DocElement>> pathsToDocElement(final Function<DocElement, Boolean> pred) {

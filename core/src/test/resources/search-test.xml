@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<foo xmlns="urn:vdx:test" blah="foo ">
+  <bar attr1="a" attr2="b" attr3=""
+       blahblahblah=""/>
+  <ham biscuit=""/>
+  <sandwich/>
+</foo>
+

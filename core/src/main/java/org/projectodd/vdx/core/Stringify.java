@@ -24,7 +24,7 @@ public class Stringify {
         if (!defaultsRegistered) {
             registerStringifier(new ElementStringifier());
             registerStringifier(new ElementListStringifier());
-            registerStringifier(new NonElementListStringifier(10));
+            registerStringifier(new NonElementListStringifier(3, 10));
             defaultsRegistered = true;
         }
     }

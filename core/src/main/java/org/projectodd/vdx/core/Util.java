@@ -94,6 +94,12 @@ public class Util {
                 .collect(Collectors.toList());
     }
 
+    public static String asCommaString(Collection<?> col) {
+        return String.join(",", col.stream()
+                .map(Object::toString)
+                .collect(Collectors.toList()));
+    }
+
     public static String pathToString(List<String> path) {
         return String.join(" > ", path);
     }

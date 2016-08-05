@@ -7,7 +7,12 @@ import org.projectodd.vdx.core.schema.SchemaElement;
 
 public class NonElementListStringifier implements Stringifier {
 
-    public NonElementListStringifier(final int limit) {
+    public NonElementListStringifier(final int threshold, final int limit) {
+        if (limit <= threshold) {
+            throw new IllegalArgumentException("limit must be greater than threshold");
+        }
+
+        this.threshold = threshold;
         this.limit = limit;
     }
 
@@ -33,15 +38,20 @@ public class NonElementListStringifier implements Stringifier {
                 .collect(Collectors.toList());
 
         final StringBuilder sb = new StringBuilder();
-        sb.append('\n');
-        values.forEach(v -> sb.append("- ").append(v).append('\n'));
+        if (values.size() <= this.threshold) {
+            sb.append(Util.asCommaString(values));
+        } else {
+            sb.append('\n');
+            values.forEach(v -> sb.append("- ").append(v).append('\n'));
 
-        if (limit < list.size()) {
-            sb.append(String.format("(and %s more)\n", list.size() - limit));
+            if (this.limit < list.size()) {
+                sb.append(String.format("(and %s more)\n", list.size() - limit));
+            }
         }
 
         return sb.toString();
     }
 
+    private final int threshold;
     private final int limit;
 }

@@ -3,7 +3,10 @@ package org.projectodd.vdx.core;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ErrorPrinter {
     public ErrorPrinter(final URL document, final List<URL> schemas) throws IOException {
@@ -41,14 +44,21 @@ public class ErrorPrinter {
     private void formatResult(final StringBuilder out, final ErrorHandler.HandledResult result) {
         final int linum = result.line();
         final int maxLinumWidth = ("" + linum + CONTEXT_LINES).length();
+        final List<PrefixedLine> preambleLines = preambleLines(linum, maxLinumWidth);
+        final List<PrefixedLine> postambleLines = postambleLines(linum, maxLinumWidth);
+        final List<PrefixedLine> allLines = new ArrayList<>();
+        allLines.addAll(preambleLines);
+        allLines.addAll(postambleLines);
+        final int removeSpaces = smallestPrefixWhitespace(allLines);
+
 
         out.append('\n')
-                .append(prefixLines(linum, maxLinumWidth))
+                .append(ambleString(preambleLines, removeSpaces))
                 .append('\n')
-                .append(leftPad(maxLinumWidth + result.column() + 1, "^ " +
+                .append(leftPad(maxLinumWidth + result.column() + 1 - removeSpaces, "^ " +
                         (result.message() != null ? result.message().toString() : "")))
                 .append("\n\n")
-                .append(postfixLines(linum, maxLinumWidth))
+                .append(ambleString(postambleLines, removeSpaces))
                 .append('\n');
 
         if (result.extraMessage() != null) {
@@ -74,32 +84,53 @@ public class ErrorPrinter {
         return String.format("%" + maxWidth + "s: ", linum + 1);
     }
 
-    private String extractLines(final int maxLinumWidth, final int start, final int end) {
-        final StringBuilder ret = new StringBuilder();
+    private List<PrefixedLine> extractLines(final int maxLinumWidth, final int start, final int end) {
+        final List<PrefixedLine> ret = new ArrayList<>();
         int linum = start;
         for (String line: this.context.extractLines(start, end)) {
-            ret.append(linumPrefix(linum, maxLinumWidth))
-                    .append(line)
-                    .append('\n');
+            ret.add(new PrefixedLine(linumPrefix(linum, maxLinumWidth), line));
             linum++;
         }
 
-        return ret.toString();
+        return ret;
     }
 
-    private String prefixLines(final int linum, final int maxLinumWidth) {
+    private List<PrefixedLine> preambleLines(final int linum, final int maxLinumWidth) {
         return extractLines(maxLinumWidth,
                             CONTEXT_LINES > linum ?  0 : linum - CONTEXT_LINES,
                             linum);
     }
 
-    private String postfixLines(final int linum, final int maxLinumWidth) {
+    private List<PrefixedLine> postambleLines(final int linum, final int maxLinumWidth) {
         return extractLines(maxLinumWidth,
                             linum,
                             CONTEXT_LINES + linum > this.context.documentLineCount() ?
                                     this.context.documentLineCount() : linum + CONTEXT_LINES);
     }
 
+    private int smallestPrefixWhitespace(final List<PrefixedLine> lines) {
+        int size = Integer.MAX_VALUE;
+
+        for(PrefixedLine line : lines) {
+            final Matcher m = Pattern.compile("^([ ]+)").matcher(line.line);
+            if (m.find()) {
+                final int len = m.group(1).length();
+                size = len < size ? len : size;
+            } else {
+                size = 0;
+            }
+        }
+
+        return size;
+    }
+
+    private String ambleString(final List<PrefixedLine> lines, final int removePrefixChars) {
+        final StringBuilder sb = new StringBuilder();
+
+        lines.forEach(l -> sb.append(l.asString(removePrefixChars)).append('\n'));
+
+        return sb.toString();
+    }
 
     private String leftPad(final int length, final String str) {
         return String.format("%" + (length + str.length()) + "s", str);
@@ -138,4 +169,18 @@ public class ErrorPrinter {
     private final URL docURL;
     private final ValidationContext context;
     private final Printer printer;
+
+    private class PrefixedLine {
+        public final String prefix;
+        public final String line;
+
+        PrefixedLine(final String prefix, final String line) {
+            this.prefix = prefix;
+            this.line = line.replaceAll("\t", "  ");
+        }
+
+        String asString(final int removePrefixChars) {
+            return String.format("%s%s", prefix, line.substring(removePrefixChars));
+        }
+    }
 }

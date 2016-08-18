@@ -12,23 +12,37 @@ public class DuplicateElementHandler implements ErrorHandler {
     @Override
     public HandledResult handle(ValidationContext ctx, ValidationError error) {
         final String el = error.element().getLocalPart();
-        final String attr = error.attribute().getLocalPart();
+        final String attr = error.attribute() != null ? error.attribute().getLocalPart() : null;
         final String attrValue = error.attributeValue();
 
-        final List<List<DocElement>> docElements =
-                ctx.pathsToDocElement(e -> e.qname().equals(error.element()) &&
-                        attrValue.equals(e.attributes().get(attr)));
+        final HandledResult result = HandledResult.from(error);
 
-        final HandledResult result = HandledResult.from(error)
-                .message(I18N.Key.ELEMENT_DUPLICATED, el, attr, attrValue);
+        if (attr != null) {
+            result.message(I18N.Key.ELEMENT_WITH_ATTRIBUTE_DUPLICATED, el, attr, attrValue);
+        } else {
+            result.message(I18N.Key.ELEMENT_DUPLICATED, el);
+        }
 
-        if (!docElements.isEmpty()) {
-            final List<DocElement> firstPath = docElements.get(0);
-            if (!firstPath.isEmpty()) {
-                final DocElement otherEl = firstPath.get(firstPath.size() - 1);
-                result.extraMessage(I18N.Key.ELEMENT_DUPLICATED_FIRST_OCCURRENCE, el, attr)
-                .extraResult(new HandledResult(otherEl.startPosition().line, otherEl.startPosition().col, null)
-                                   .message(I18N.Key.BLANK));
+        final List<DocElement> path =
+                ctx.pathToDocElement(e -> e.qname().equals(error.element()) && e.encloses(error.position()));
+
+        if (path != null) {
+            final List<List<DocElement>> docElements =
+                    ctx.docElementSiblings(path, e -> e.qname().equals(error.element()) &&
+                            (attr == null || attrValue.equals(e.attributes().get(attr))));
+
+            if (!docElements.isEmpty()) {
+                final List<DocElement> firstPath = docElements.get(0);
+                if (!firstPath.isEmpty()) {
+                    final DocElement otherEl = firstPath.get(firstPath.size() - 1);
+                    if (attr != null) {
+                        result.extraMessage(I18N.Key.ELEMENT_WITH_ATTRIBUTE_DUPLICATED_FIRST_OCCURRENCE, el, attr);
+                    } else {
+                        result.extraMessage(I18N.Key.ELEMENT_DUPLICATED_FIRST_OCCURRENCE, el);
+                    }
+                    result.extraResult(new HandledResult(otherEl.startPosition().line, otherEl.startPosition().col, null)
+                                               .message(I18N.Key.BLANK));
+                }
             }
         }
 

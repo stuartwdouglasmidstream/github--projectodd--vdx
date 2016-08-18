@@ -36,21 +36,36 @@
 (deftest test-DuplicateElementHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
               [(io/resource "schemas/handler-test.xsd")])]
-    (let [res (.handle (DuplicateElementHandler.)
-                ctx
-                (-> (ValidationError. ErrorType/DUPLICATE_ELEMENT
-                      ""
-                      (location 1 1))
-                  (.element (QName. "urn:vdx:test" "bar"))
-                  (.attribute (QName. "attr1"))
-                  (.attributeValue "a")))]
-      (assert-message (.message res)
-        I18N$Key/ELEMENT_DUPLICATED "bar" "attr1" "a")
-      (assert-message (.extraMessage res)
-        I18N$Key/ELEMENT_DUPLICATED_FIRST_OCCURRENCE "bar" "attr1")
-      (is (.extraResult res))
-      (assert-message (.message (.extraResult res))
-        I18N$Key/BLANK))))
+    (testing "with an attribute"
+      (let [res (.handle (DuplicateElementHandler.)
+                         ctx
+                         (-> (ValidationError. ErrorType/DUPLICATE_ELEMENT
+                                               ""
+                                               (location 7 4))
+                             (.element (QName. "urn:vdx:test" "bar"))
+                             (.attribute (QName. "attr1"))
+                             (.attributeValue "a")))]
+        (assert-message (.message res)
+                        I18N$Key/ELEMENT_WITH_ATTRIBUTE_DUPLICATED "bar" "attr1" "a")
+        (assert-message (.extraMessage res)
+                        I18N$Key/ELEMENT_WITH_ATTRIBUTE_DUPLICATED_FIRST_OCCURRENCE "bar" "attr1")
+        (is (.extraResult res))
+        (assert-message (.message (.extraResult res))
+                        I18N$Key/BLANK)))
+    (testing "without an attribute"
+      (let [res (.handle (DuplicateElementHandler.)
+                         ctx
+                         (-> (ValidationError. ErrorType/DUPLICATE_ELEMENT
+                                               ""
+                                               (location 7 4))
+                             (.element (QName. "urn:vdx:test" "bar"))))]
+        (assert-message (.message res)
+                        I18N$Key/ELEMENT_DUPLICATED "bar")
+        (assert-message (.extraMessage res)
+                        I18N$Key/ELEMENT_DUPLICATED_FIRST_OCCURRENCE "bar")
+        (is (.extraResult res))
+        (assert-message (.message (.extraResult res))
+                        I18N$Key/BLANK)))))
 
 (deftest test-UnexpectedAttributeHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
@@ -137,6 +152,20 @@
 (deftest test-UnexpectedElementHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
               [(io/resource "schemas/handler-test.xsd")])]
+    (testing "it's really a duplicate"
+      (let [res (.handle (UnexpectedElementHandler.)
+                         ctx
+                         (-> (ValidationError. ErrorType/UNEXPECTED_ELEMENT
+                                               ""
+                                               (location 7 4))
+                             (.element (QName. "urn:vdx:test" "bar"))))]
+        (assert-message (.message res)
+                        I18N$Key/ELEMENT_DUPLICATED "bar")
+        (assert-message (.extraMessage res)
+                        I18N$Key/ELEMENT_DUPLICATED_FIRST_OCCURRENCE "bar")
+        (is (.extraResult res))
+        (assert-message (.message (.extraResult res))
+                        I18N$Key/BLANK)))
     (testing "unmatchable element with no alternates"
       (let [res (.handle (UnexpectedElementHandler.)
                   ctx

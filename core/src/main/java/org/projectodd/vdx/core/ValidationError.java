@@ -18,12 +18,20 @@ public class ValidationError {
         return new ValidationError(type, error.getMessage(), error.getLocation());
     }
 
+    public static ValidationError from(final ValidationError error, final ErrorType type) {
+        return new ValidationError(type, error.message(), error.location());
+    }
+
     public ErrorType type() {
         return type;
     }
     
     public Location location() {
         return location;
+    }
+
+    public Position position() {
+        return new Position(this.location.getLineNumber(), this.location.getColumnNumber());
     }
 
     public String message() {

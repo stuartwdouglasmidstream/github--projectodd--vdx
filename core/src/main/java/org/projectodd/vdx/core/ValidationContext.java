@@ -148,6 +148,26 @@ public class ValidationContext {
         return documentTree().pathsToValue(true, pred);
     }
 
+
+    public List<DocElement> pathToDocElement(final Function<DocElement, Boolean> pred) {
+        List<List<DocElement>> paths = pathsToDocElement(pred);
+        if (!paths.isEmpty()) {
+
+            return paths.get(0);
+        }
+
+        return null;
+    }
+
+    public List<List<DocElement>> docElementSiblings(final List<DocElement> element, final Function<DocElement, Boolean> pred) {
+        final List<DocElement> parentPath = element.subList(0, element.size() - 1);
+
+        return pathsToDocElement(pred).stream()
+                .filter(p -> !p.equals(element))
+                .filter(p -> p.subList(0, p.size() - 1).equals(parentPath))
+                .collect(Collectors.toList());
+    }
+
     private Tree<DocElement> documentTree() {
         if (this.walkedDoc == null) {
             this.walkedDoc = new DocWalker(this.document).walk();

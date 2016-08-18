@@ -40,6 +40,11 @@ public class DocElement {
         return this;
     }
 
+    public boolean encloses(final Position pos) {
+        return this.startPosition.compareTo(pos) <= 0 &&
+                this.endPosition.compareTo(pos) >= 0;
+    }
+
     public String name() {
         return name.getLocalPart();
     }
@@ -59,6 +64,20 @@ public class DocElement {
         }
 
         return attrMap;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (obj == this) return true;
+        if (!(obj instanceof DocElement)) return false;
+
+        final DocElement that = (DocElement)obj;
+
+        return this.qname().equals(that.qname()) &&
+                this.attributes.equals(that.attributes) &&
+                this.startPosition.equals(that.startPosition) &&
+                this.endPosition.equals(that.endPosition);
     }
 
     @Override

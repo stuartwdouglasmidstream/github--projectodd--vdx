@@ -15,11 +15,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Util {
+    private static final Pattern XMLNS_RE = Pattern.compile("xmlns\\s*=\\s*[\"'](.*?)[\"']");
+
     public static Set<String> extractXMLNS(final List<String> lines) {
-        final Pattern pattern = Pattern.compile("xmlns\\s*=\\s*[\"'](.*?)[\"']");
         final Set<String> xmlnses = new TreeSet<>();
         lines.forEach(l -> {
-            final Matcher m = pattern.matcher(l);
+            final Matcher m = XMLNS_RE.matcher(l);
             if (m.find()) {
                 xmlnses.add(m.group(1));
             }
@@ -28,12 +29,13 @@ public class Util {
         return xmlnses;
     }
 
+    private static final Pattern TARGET_NS_RE = Pattern.compile("targetNamespace\\s*=\\s*[\"'](.*?)[\"']");
+
     public static boolean providesXMLNS(final Set<String> xmlnses, URL url) throws IOException {
-        final Pattern pattern = Pattern.compile("targetNamespace\\s*=\\s*[\"'](.*?)[\"']");
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
             String line = reader.readLine();
             while (line != null) {
-                final Matcher m = pattern.matcher(line);
+                final Matcher m = TARGET_NS_RE.matcher(line);
                 if (m.find() &&
                         xmlnses.contains(m.group(1))) {
 

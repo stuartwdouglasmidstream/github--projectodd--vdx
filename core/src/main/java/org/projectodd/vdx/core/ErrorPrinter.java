@@ -108,11 +108,13 @@ public class ErrorPrinter {
                                     this.context.documentLineCount() : linum + CONTEXT_LINES);
     }
 
+    private final Pattern LEADING_WHITESPACE_RE = Pattern.compile("^([ ]+)");
+
     private int smallestPrefixWhitespace(final List<PrefixedLine> lines) {
         int size = Integer.MAX_VALUE;
 
         for(PrefixedLine line : lines) {
-            final Matcher m = Pattern.compile("^([ ]+)").matcher(line.line);
+            final Matcher m = LEADING_WHITESPACE_RE.matcher(line.line);
             if (m.find()) {
                 final int len = m.group(1).length();
                 size = len < size ? len : size;

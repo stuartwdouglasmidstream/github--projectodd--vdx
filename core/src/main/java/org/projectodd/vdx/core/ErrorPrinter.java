@@ -9,18 +9,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.projectodd.vdx.core.schema.SchemaPathPrefixFinder;
+
 public class ErrorPrinter {
     public ErrorPrinter(final URL document, final List<URL> schemas) throws IOException {
-        this(document, schemas, Printer.DEFAULT_PRINTER, null);
-    }
-
-    public ErrorPrinter(final URL document, final List<URL> schemas, final Printer printer, final List<Stringifier> stringifiers) throws IOException {
         this.context = new ValidationContext(document, schemas);
         this.docURL = document;
-        this.printer = printer;
-        if (stringifiers != null) {
-            stringifiers.forEach(Stringify::registerStringifier);
-        }
     }
 
     public void print(ValidationError error) {
@@ -40,6 +34,29 @@ public class ErrorPrinter {
 
             this.printer.println(out.toString());
         }
+    }
+
+    public ErrorPrinter printer(final Printer printer) {
+        if (printer == null) {
+            throw new IllegalArgumentException("printer can't be null");
+        }
+        this.printer = printer;
+
+        return this;
+    }
+
+    public ErrorPrinter stringifiers(final List<Stringifier> stringifiers) {
+        if (stringifiers != null) {
+            stringifiers.forEach(Stringify::registerStringifier);
+        }
+
+        return this;
+    }
+
+    public ErrorPrinter prefixFinder(final SchemaPathPrefixFinder prefixFinder) {
+        this.context.prefixFinder(prefixFinder);
+
+        return this;
     }
 
     private void formatResult(final StringBuilder out, final ErrorHandler.HandledResult result) {
@@ -175,7 +192,7 @@ public class ErrorPrinter {
 
     private final URL docURL;
     private final ValidationContext context;
-    private final Printer printer;
+    private Printer printer = Printer.DEFAULT_PRINTER;
 
     private class PrefixedLine {
         public final String prefix;

@@ -16,7 +16,10 @@ import java.util.stream.Collectors;
 import javax.xml.namespace.QName;
 
 import org.projectodd.vdx.core.schema.SchemaElement;
+import org.projectodd.vdx.core.schema.SchemaPathPrefixFinder;
 import org.projectodd.vdx.core.schema.SchemaWalker;
+
+import static java.util.Collections.EMPTY_LIST;
 
 public class ValidationContext {
     public ValidationContext(final URL document, final List<URL> schemas) throws IOException {
@@ -31,6 +34,12 @@ public class ValidationContext {
                 this.schemas.add(url);
             }
         }
+    }
+
+    public ValidationContext prefixFinder(final SchemaPathPrefixFinder finder) {
+        this.prefixFinder = finder;
+
+        return this;
     }
 
     public int documentLineCount() {
@@ -61,28 +70,40 @@ public class ValidationContext {
     private List<List<SchemaElement>> alternateElements(final boolean includeValue, final Function<SchemaElement, Boolean> pred) {
         return schemaTree().pathsToValue(includeValue, pred)
                 .stream()
-                .map(this::docPathWithPrefix)
+                .map(this::schemaPathWithPrefix)
                 .collect(Collectors.toList());
     }
 
-    /*
-    FIXME; this is pretty weak - it finds the first place the first element in the current path occurs, without regard for it
-    actually being the same element. A better approach may be to walk down every prefix path, and order the results by
-    the length of overlap.
-     */
-    private List<SchemaElement> docPathWithPrefix(final List<SchemaElement> path) {
-        final List<SchemaElement> fullPath = new ArrayList<>();
-        final List<List<DocElement>> prefixPaths = documentTree().pathsToValue(e -> e.name().equals(path.get(0).name()));
+    private List<SchemaElement> schemaPathWithPrefix(final List<SchemaElement> path) {
+        if (this.prefixFinder == null) {
+            this.prefixFinder = p -> {
+                final List<List<DocElement>> prefixPaths = documentTree().pathsToValue(e -> e.name().equals(p.get(0).getLocalPart()));
 
-        if (!prefixPaths.isEmpty()) {
-            fullPath.addAll(prefixPaths.get(0).stream()
-                                    .map(e -> new SchemaElement(QName.valueOf(e.name())))
-                                    .collect(Collectors.toList()));
+                if (!prefixPaths.isEmpty()) {
+                    return prefixPaths.get(0)
+                            .stream()
+                            .map(e -> QName.valueOf(e.name()))
+                            .collect(Collectors.toList());
+                }
+
+                return EMPTY_LIST;
+            };
         }
 
-        fullPath.addAll(path);
+        final List<QName> prefix = this.prefixFinder.prefixFor(path.stream()
+                                                                       .map(SchemaElement::qname)
+                                                                       .collect(Collectors.toList()));
+        if (prefix != null && !prefix.isEmpty()) {
+            final List<SchemaElement> fullPath = new ArrayList<>();
+            fullPath.addAll(prefix.stream()
+                                    .map(SchemaElement::new)
+                                    .collect(Collectors.toList()));
+            fullPath.addAll(path);
 
-        return fullPath;
+            return fullPath;
+        }
+
+        return path;
     }
 
     @SuppressWarnings("unchecked")
@@ -191,4 +212,5 @@ public class ValidationContext {
     private final List<URL> schemas = new ArrayList<>();
     private Tree<SchemaElement> walkedSchemas = null;
     private Tree<DocElement> walkedDoc = null;
+    private SchemaPathPrefixFinder prefixFinder = null;
 }

@@ -48,7 +48,17 @@ public class Util {
     }
 
     public static String alternateSpelling(final String current, final Collection<String> alternates) {
-        return alternateSpelling(current, alternates, 4);
+        return alternateSpelling(current, alternates, dynamicThreshold(current));
+    }
+
+    // we want a smaller threshold for short words, and want a max threshold, no matter the length
+    private static int dynamicThreshold(final String s) {
+        final int len = s.length();
+
+        if (len < 6)  return 2;
+        if (len < 10) return 3;
+        if (len < 14) return 4;
+                      return 5;
     }
 
     public static String alternateSpelling(final String current, final Collection<String> alternates, final int threshold) {
@@ -80,7 +90,6 @@ public class Util {
                            Arrays.stream(v.split("\\n"))
                                    .map(x -> String.format("%s%s", prefix, x))
                                    .collect(Collectors.toList()));
-
     }
 
     @SuppressWarnings("unchecked")

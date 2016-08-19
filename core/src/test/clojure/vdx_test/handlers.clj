@@ -199,10 +199,10 @@
                         ""
                         (location 6 4))
                     (.element (QName. "urn:vdx:test" "ham"))
-                    (.alternatives #{"abc"})))]
+                    (.alternatives #{"ahm"})))]
         (assert-message (.extraMessage res)
           I18N$Key/DID_YOU_MEAN
-          "abc")))
+          "ahm")))
 
     (testing "matchable element"
       (let [res (.handle (UnexpectedElementHandler.)

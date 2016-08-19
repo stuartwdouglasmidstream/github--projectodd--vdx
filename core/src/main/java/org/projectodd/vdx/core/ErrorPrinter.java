@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,9 +56,8 @@ public class ErrorPrinter {
         out.append('\n')
                 .append(ambleString(preambleLines, removeSpaces))
                 .append('\n')
-                .append(leftPad(maxLinumWidth + result.column() + 1 - removeSpaces, "^ " +
-                        (result.message() != null ? result.message().toString() : "")))
-                .append("\n\n")
+                .append(alignPointerMessage(maxLinumWidth + result.column() + 1 - removeSpaces, result.message()))
+                .append("\n")
                 .append(ambleString(postambleLines, removeSpaces))
                 .append('\n');
 
@@ -134,8 +134,23 @@ public class ErrorPrinter {
         return sb.toString();
     }
 
-    private String leftPad(final int length, final String str) {
-        return String.format("%" + (length + str.length()) + "s", str);
+    private static final String POINTER = "^";
+    private String alignPointerMessage(final int length, final Object msg) {
+        if (msg == null) {
+
+            return String.format("%" + (length + POINTER.length()) + "s", POINTER);
+        }
+
+        final String[] lines = msg.toString().split("\n");
+        final StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%" + (length + lines[0].length() + POINTER.length() + 1) + "s", POINTER + " " + lines[0]))
+                .append('\n');
+        for (int i = 1; i < lines.length; i++) {
+            sb.append(String.format("%" + (length + lines[i].length() + POINTER.length() + 1) + "s", lines[i]))
+                    .append('\n');
+        }
+
+        return sb.toString();
     }
 
     private static final char DASH = '=';

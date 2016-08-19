@@ -55,6 +55,10 @@ public class I18N {
         locale = l;
     }
 
+    public static String validationErrorIn(final String docName) {
+        return "OPVDX001: " + format(I18N.Key.VALIDATION_ERROR_IN, docName);
+    }
+
     private static Locale activeLocale() {
         return locale == null ? Locale.getDefault() : locale;
     }

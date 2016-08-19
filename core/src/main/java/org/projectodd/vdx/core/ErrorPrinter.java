@@ -30,7 +30,7 @@ public class ErrorPrinter {
 
             final StringBuilder out = new StringBuilder()
                     .append('\n')
-                    .append(divider(I18N.format(I18N.Key.VALIDATION_ERROR_IN, docPathParts[docPathParts.length - 1])));
+                    .append(divider(I18N.validationErrorIn(docPathParts[docPathParts.length - 1])));
 
             formatResult(out, res);
 
@@ -143,23 +143,13 @@ public class ErrorPrinter {
     }
 
     private String divider(String heading) {
-        final int dashes = heading != null ? (80 - heading.length() - 2) / 2 : 40;
+        final int dashes = heading != null ? 80 - heading.length() - 1 : 80;
         final StringBuilder ret = new StringBuilder();
-        for(int i = 0; i < dashes; i++) {
-            ret.append(DASH);
-        }
-
         if (heading != null) {
-            ret.append(' ')
-                    .append(heading)
-                    .append(' ');
+            ret.append(heading).append(' ');
         }
 
         for(int i = 0; i < dashes; i++) {
-            ret.append(DASH);
-        }
-
-        if (ret.length() < 80) {
             ret.append(DASH);
         }
 

@@ -83,7 +83,9 @@
         (assert-message (.message res)
           I18N$Key/ATTRIBUTE_NOT_ALLOWED
           "biscuit" "ham")
-        (is (nil? (.extraMessage res)))))
+        (assert-message (.extraMessage res)
+                        I18N$Key/ELEMENT_HAS_NO_ATTRIBUTES
+                        "ham")))
 
     (testing "unmatchable attribute with schema alternatives"
       (let [res (.handle (UnexpectedAttributeHandler.)

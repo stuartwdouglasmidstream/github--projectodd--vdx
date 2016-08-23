@@ -1,10 +1,14 @@
 package org.projectodd.vdx.core.handlers;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 
+import org.projectodd.vdx.core.DocElement;
 import org.projectodd.vdx.core.ErrorHandler;
 import org.projectodd.vdx.core.I18N;
 import org.projectodd.vdx.core.Message;
@@ -18,6 +22,7 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public HandledResult handle(ValidationContext ctx, ValidationError error) {
         final Location loc = error.location();
         final String attr = error.attribute().getLocalPart();
@@ -31,10 +36,29 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
         if (!altElements.isEmpty()) {
             extra = new Message(I18N.Key.ATTRIBUTE_IS_ALLOWED_ON, attr, altElements);
         } else {
-            final List<String> otherAttributes = Util.asSortedList(!error.alternatives().isEmpty() ?
-                                                                           error.alternatives() :
-                                                                           ctx.attributesForElement(error.element()));
-            if (!otherAttributes.isEmpty()) {
+            final List<String> otherAttributes;
+
+            if (error.alternatives().isEmpty()) {
+                final List<QName> pathFromDoc =
+                        ctx.pathToDocElement(e -> e.qname().equals(error.element()) && e.encloses(error.position())).stream()
+                        .map(DocElement::qname)
+                        .collect(Collectors.toList());
+                final List<SchemaElement> schemaPath = ctx.pathsToSchemaElement(e -> e.qname().equals(error.element())).stream()
+                        .filter(x -> x.stream()
+                                .map(SchemaElement::qname)
+                                .collect(Collectors.toList())
+                                .equals(pathFromDoc))
+                        .findFirst()
+                        .orElse(Collections.EMPTY_LIST);
+
+                otherAttributes = Util.asSortedList(ctx.attributesForElement(schemaPath));
+            } else {
+                otherAttributes = Util.asSortedList(error.alternatives());
+            }
+
+            if (otherAttributes.isEmpty()) {
+                extra = new Message(I18N.Key.ELEMENT_HAS_NO_ATTRIBUTES, el);
+            } else {
                 final String altSpelling = Util.alternateSpelling(attr, otherAttributes);
 
                 if (altSpelling != null) {

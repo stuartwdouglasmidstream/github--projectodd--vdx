@@ -2,7 +2,8 @@
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io])
   (:import (org.projectodd.vdx.core ValidationContext)
-           (javax.xml.namespace QName)))
+           (javax.xml.namespace QName)
+           [org.projectodd.vdx.core.schema SchemaElement]))
 
 (defn assert-position [line col pos]
   (is (= line (.line pos)))
@@ -11,7 +12,8 @@
 (deftest attributesForElement-should-work
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
                                 [(io/resource "schemas/handler-test.xsd")])]
-    (is (= #{"attr1" "some-attr"} (.attributesForElement ctx (QName. "urn:vdx:test" "bar"))))))
+    (is (= #{"attr1" "some-attr"} (.attributesForElement ctx [(SchemaElement. (QName. "urn:vdx:test" "foo"))
+                                                              (SchemaElement. (QName. "urn:vdx:test" "bar"))])))))
 
 (deftest searchForward
   (let [ctx (ValidationContext. (io/resource "search-test.xml")

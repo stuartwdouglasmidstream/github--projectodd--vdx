@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -106,16 +108,24 @@ public class ValidationContext {
         return path;
     }
 
-    @SuppressWarnings("unchecked")
-    public Set<String> attributesForElement(final QName elName) {
-        return schemaTree().reduce(new HashSet<>(), (accum, el) -> {
-                if (el.qname().equals(elName)) {
-                    accum.addAll(el.attributes());
-                    Tree.reduceComplete(accum);
-                }
+    public Set<String> attributesForElement(final List<SchemaElement> path) {
+        Tree<SchemaElement> tree = schemaTree();
+        final Deque<SchemaElement> pathStack = new ArrayDeque<>(path);
 
-                return accum;
-            });
+        while (tree != null && !pathStack.isEmpty()) {
+            final SchemaElement cur = pathStack.pop();
+            tree = tree.children().stream()
+                    .filter(t -> t.value().qname().equals(cur.qname()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        final Set<String> ret = new HashSet<>();
+        if (tree != null && !tree.isRoot()) {
+            ret.addAll(tree.value().attributes());
+        }
+
+        return ret;
     }
 
     public Position searchForward(final int startLine, final int startCol, final Pattern regex) {
@@ -172,6 +182,20 @@ public class ValidationContext {
 
     public List<DocElement> pathToDocElement(final Function<DocElement, Boolean> pred) {
         List<List<DocElement>> paths = pathsToDocElement(pred);
+        if (!paths.isEmpty()) {
+
+            return paths.get(0);
+        }
+
+        return null;
+    }
+
+    public List<List<SchemaElement>> pathsToSchemaElement(final Function<SchemaElement, Boolean> pred) {
+        return schemaTree().pathsToValue(true, pred);
+    }
+
+    public List<SchemaElement> pathToSchemaElement(final Function<SchemaElement, Boolean> pred) {
+        List<List<SchemaElement>> paths = pathsToSchemaElement(pred);
         if (!paths.isEmpty()) {
 
             return paths.get(0);

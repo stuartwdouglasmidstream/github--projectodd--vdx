@@ -40,7 +40,9 @@ public class DocWalker {
             public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
                 final String namespace = attributes.getValue("xmlns");
                 if (namespace != null) {
-                    currentNamespace = namespace;
+                    nsStack.push(namespace);
+                } else {
+                    nsStack.push(nsStack.peek());
                 }
                 stack.push(stack.peek().addChild(new DocElement(qname(qName), attributes)
                                                          .startPosition(lastPosition)));
@@ -52,6 +54,7 @@ public class DocWalker {
                 stack.peek().value().endPosition(pos);
                 storePosition(pos);
                 stack.pop();
+                nsStack.pop();
             }
 
             @Override
@@ -74,8 +77,8 @@ public class DocWalker {
             }
 
             private QName qname(final String local) {
-                if (currentNamespace != null) {
-                    return new QName(currentNamespace, local);
+                if (nsStack.peek() != null) {
+                    return new QName(nsStack.peek(), local);
                 } else {
                     return QName.valueOf(local);
                 }
@@ -87,7 +90,7 @@ public class DocWalker {
 
             private Locator locator = null;
             private Position lastPosition = new Position(1, 2);
-            private String currentNamespace = null;
+            private Deque<String> nsStack = new ArrayDeque<>();
         };
 
         try (final InputStream in = this.document.openStream()) {

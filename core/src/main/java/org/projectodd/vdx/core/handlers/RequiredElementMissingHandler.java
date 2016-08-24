@@ -23,15 +23,15 @@ public class RequiredElementMissingHandler implements ErrorHandler {
                                                 Pattern.compile(String.format("<%s[ >/]", el)));
 
         final HandledResult result = HandledResult.from(error)
-                .message(I18N.Key.ELEMENT_REQUIRED_MISSING, el);
+                .primaryMessage(I18N.Key.ELEMENT_REQUIRED_MISSING, el);
 
         if (pos != null) {
             result.line(pos.line).column(pos.col);
         }
 
         if (!alts.isEmpty()) {
-            result.extraMessage(I18N.Key.ELEMENT_REQUIRED_MISSING_LIST, el,
-                                Util.asSortedList(alts).stream()
+            result.secondaryMessage(I18N.Key.ELEMENT_REQUIRED_MISSING_LIST, el,
+                                    Util.asSortedList(alts).stream()
                                         .map(String::toLowerCase)
                                         .collect(Collectors.toList()));
         }

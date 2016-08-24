@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,16 +73,16 @@ public class ErrorPrinter {
         out.append('\n')
                 .append(ambleString(preambleLines, removeSpaces))
                 .append('\n')
-                .append(alignPointerMessage(maxLinumWidth + result.column() + 1 - removeSpaces, result.messages()))
+                .append(alignPointerMessage(maxLinumWidth + result.column() + 1 - removeSpaces, result.primaryMessages()))
                 .append("\n")
                 .append(ambleString(postambleLines, removeSpaces));
 
-        if (!result.extraMessages().isEmpty()) {
-            result.extraMessages().forEach(m -> out.append("\n").append(m.toString()).append("\n"));
+        if (!result.secondaryMessages().isEmpty()) {
+            result.secondaryMessages().forEach(m -> out.append("\n").append(m.toString()).append("\n"));
         }
 
-        if (!result.extraResults().isEmpty()) {
-            result.extraResults().forEach(r -> formatResult(out, r));
+        if (!result.secondaryResults().isEmpty()) {
+            result.secondaryResults().forEach(r -> formatResult(out, r));
         } else {
             out.append("\n");
         }

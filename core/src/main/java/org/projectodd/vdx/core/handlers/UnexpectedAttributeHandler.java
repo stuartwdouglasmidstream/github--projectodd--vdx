@@ -11,7 +11,6 @@ import javax.xml.stream.Location;
 import org.projectodd.vdx.core.DocElement;
 import org.projectodd.vdx.core.ErrorHandler;
 import org.projectodd.vdx.core.I18N;
-import org.projectodd.vdx.core.Message;
 import org.projectodd.vdx.core.Position;
 import org.projectodd.vdx.core.schema.SchemaElement;
 import org.projectodd.vdx.core.Util;
@@ -31,7 +30,7 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
                                                Pattern.compile(attr + "\\s*="));
         final List<List<SchemaElement>> altElements = ctx.alternateElementsForAttribute(attr);
         final HandledResult result = HandledResult.from(error)
-                .message(I18N.Key.ATTRIBUTE_NOT_ALLOWED, attr, el);
+                .primaryMessage(I18N.Key.ATTRIBUTE_NOT_ALLOWED, attr, el);
 
         if (pos != null) {
             result.line(pos.line).column(pos.col);
@@ -45,7 +44,7 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
                             .map(DocElement::qname)
                             .collect(Collectors.toList());
             final List<SchemaElement> schemaPath = ctx.pathsToSchemaElement(e -> e.qname().equals(error.element())).stream()
-                    .filter(x -> ctx.schemaPathWithPrefix(x).stream()
+                    .filter(p -> ctx.schemaPathWithPrefix(p).stream()
                             .map(SchemaElement::qname)
                             .collect(Collectors.toList())
                             .equals(pathFromDoc))
@@ -58,18 +57,17 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
         }
 
         if (!altElements.isEmpty()) {
-            result.extraMessage(I18N.Key.ATTRIBUTE_IS_ALLOWED_ON, attr, altElements);
+            result.secondaryMessage(I18N.Key.ATTRIBUTE_IS_ALLOWED_ON, attr, altElements);
         }
 
-
         if (otherAttributes.isEmpty()) {
-            result.extraMessage(I18N.Key.ELEMENT_HAS_NO_ATTRIBUTES, el);
+            result.secondaryMessage(I18N.Key.ELEMENT_HAS_NO_ATTRIBUTES, el);
         } else {
-            result.message(I18N.Key.ATTRIBUTES_ALLOWED_HERE, otherAttributes);
+            result.primaryMessage(I18N.Key.ATTRIBUTES_ALLOWED_HERE, otherAttributes);
 
             final String altSpelling = Util.alternateSpelling(attr, otherAttributes);
             if (altSpelling != null) {
-                result.message(I18N.Key.DID_YOU_MEAN, altSpelling);
+                result.primaryMessage(I18N.Key.DID_YOU_MEAN, altSpelling);
             }
         }
 

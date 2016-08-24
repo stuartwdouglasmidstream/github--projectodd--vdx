@@ -1,7 +1,6 @@
 package org.projectodd.vdx.core.handlers;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.xml.namespace.QName;
 
@@ -59,7 +58,7 @@ public class UnexpectedElementHandler implements ErrorHandler {
         }
 
         return HandledResult.from(error)
-                .message(I18N.Key.ELEMENT_NOT_ALLOWED, elName)
-                .extraMessage(extra);
+                .primaryMessage(I18N.Key.ELEMENT_NOT_ALLOWED, elName)
+                .secondaryMessage(extra);
     }
 }

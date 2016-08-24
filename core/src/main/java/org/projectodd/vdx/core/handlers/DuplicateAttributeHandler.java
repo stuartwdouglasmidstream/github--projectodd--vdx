@@ -1,10 +1,7 @@
 package org.projectodd.vdx.core.handlers;
 
-import javax.xml.stream.Location;
-
 import org.projectodd.vdx.core.ErrorHandler;
 import org.projectodd.vdx.core.I18N;
-import org.projectodd.vdx.core.Message;
 import org.projectodd.vdx.core.ValidationContext;
 import org.projectodd.vdx.core.ValidationError;
 
@@ -15,6 +12,6 @@ public class DuplicateAttributeHandler implements ErrorHandler {
         final String el = error.element().getLocalPart();
 
         return HandledResult.from(error)
-                .message(I18N.Key.ATTRIBUTE_DUPLICATED, attr, el);
+                .primaryMessage(I18N.Key.ATTRIBUTE_DUPLICATED, attr, el);
     }
 }

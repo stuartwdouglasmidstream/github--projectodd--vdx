@@ -45,11 +45,11 @@
                     (.element (QName. "urn:vdx:test" "bar"))
                     (.attribute (QName. "attr1"))
                     (.attributeValue "a")))]
-        (assert-message (first (.messages res))
+        (assert-message (first (.primaryMessages res))
           I18N$Key/ELEMENT_WITH_ATTRIBUTE_DUPLICATED "bar" "attr1" "a")
-        (assert-message (first (.extraMessages res))
+        (assert-message (first (.secondaryMessages res))
           I18N$Key/ELEMENT_WITH_ATTRIBUTE_DUPLICATED_FIRST_OCCURRENCE "bar" "attr1")
-        (assert-message (first (.messages (first (.extraResults res))))
+        (assert-message (first (.primaryMessages (first (.secondaryResults res))))
           I18N$Key/BLANK)))
     (testing "without an attribute"
       (let [res (.handle (DuplicateElementHandler.)
@@ -58,11 +58,11 @@
                         ""
                         (location 7 4))
                     (.element (QName. "urn:vdx:test" "bar"))))]
-        (assert-message (first (.messages res))
+        (assert-message (first (.primaryMessages res))
           I18N$Key/ELEMENT_DUPLICATED "bar")
-        (assert-message (first (.extraMessages res))
+        (assert-message (first (.secondaryMessages res))
           I18N$Key/ELEMENT_DUPLICATED_FIRST_OCCURRENCE "bar")
-        (assert-message (first (.messages (first (.extraResults res))))
+        (assert-message (first (.primaryMessages (first (.secondaryResults res))))
           I18N$Key/BLANK)))))
 
 (deftest test-UnexpectedAttributeHandler
@@ -78,10 +78,10 @@
                     (.attribute (QName. "biscuit"))))]
         (is (= 6 (.line res)))
         (is (= 8 (.column res)))
-        (assert-message (first (.messages res))
+        (assert-message (first (.primaryMessages res))
           I18N$Key/ATTRIBUTE_NOT_ALLOWED
           "biscuit" "ham")
-        (assert-message (first (.extraMessages res))
+        (assert-message (first (.secondaryMessages res))
           I18N$Key/ELEMENT_HAS_NO_ATTRIBUTES
           "ham")))
 
@@ -93,7 +93,7 @@
                         (location 4 4))
                     (.element (QName. "urn:vdx:test" "bar"))
                     (.attribute (QName. "blahblahblah"))))]
-        (assert-message (second (.messages res))
+        (assert-message (second (.primaryMessages res))
           I18N$Key/ATTRIBUTES_ALLOWED_HERE
           ["attr1" "some-attr"])))
 
@@ -106,7 +106,7 @@
                     (.element (QName. "urn:vdx:test" "bar"))
                     (.attribute (QName. "blahblahblah"))
                     (.alternatives #{"abc"})))]
-        (assert-message (second (.messages res))
+        (assert-message (second (.primaryMessages res))
           I18N$Key/ATTRIBUTES_ALLOWED_HERE
           ["abc"])))
 
@@ -119,7 +119,7 @@
                     (.element (QName. "urn:vdx:test" "bar"))
                     (.attribute (QName. "attr2"))))]
         (is (= 18 (.column res)))
-        (assert-message (nth (.messages res) 2)
+        (assert-message (nth (.primaryMessages res) 2)
           I18N$Key/DID_YOU_MEAN
           "attr1")))
 
@@ -133,7 +133,7 @@
                     (.attribute (QName. "attr2"))
                     (.alternatives #{"attrx"})))]
         (is (= 18 (.column res)))
-        (assert-message (nth (.messages res) 2)
+        (assert-message (nth (.primaryMessages res) 2)
           I18N$Key/DID_YOU_MEAN "attrx")))
 
     (testing "matchable attribute"
@@ -145,7 +145,7 @@
                     (.element (QName. "urn:vdx:test" "bar"))
                     (.attribute (QName. "attr3"))))]
         (is (= 28 (.column res)))
-        (assert-message (first (.extraMessages res))
+        (assert-message (first (.secondaryMessages res))
           I18N$Key/ATTRIBUTE_IS_ALLOWED_ON
           "attr3" [["foo"]])))))
 
@@ -159,11 +159,11 @@
                         ""
                         (location 7 4))
                     (.element (QName. "urn:vdx:test" "bar"))))]
-        (assert-message (first (.messages res))
+        (assert-message (first (.primaryMessages res))
           I18N$Key/ELEMENT_DUPLICATED "bar")
-        (assert-message (first (.extraMessages res))
+        (assert-message (first (.secondaryMessages res))
           I18N$Key/ELEMENT_DUPLICATED_FIRST_OCCURRENCE "bar")
-        (assert-message (first (.messages (first (.extraResults res))))
+        (assert-message (first (.primaryMessages (first (.secondaryResults res))))
           I18N$Key/BLANK)))
     (testing "unmatchable element with no alternates"
       (let [res (.handle (UnexpectedElementHandler.)
@@ -174,10 +174,10 @@
                     (.element (QName. "urn:vdx:test" "ham"))))]
         (is (= 6 (.line res)))
         (is (= 4 (.column res)))
-        (assert-message (first (.messages res))
+        (assert-message (first (.primaryMessages res))
           I18N$Key/ELEMENT_NOT_ALLOWED
           "ham")
-        (is (empty? (.extraMessages res)))))
+        (is (empty? (.secondaryMessages res)))))
 
     (testing "unmatchable element with provided alternatives"
       (let [res (.handle (UnexpectedElementHandler.)
@@ -187,7 +187,7 @@
                         (location 6 4))
                     (.element (QName. "urn:vdx:test" "ham"))
                     (.alternatives #{"abcdefg"})))]
-        (assert-message (first (.extraMessages res))
+        (assert-message (first (.secondaryMessages res))
           I18N$Key/ELEMENTS_ALLOWED_HERE
           ["abcdefg"])))
 
@@ -199,7 +199,7 @@
                         (location 6 4))
                     (.element (QName. "urn:vdx:test" "ham"))
                     (.alternatives #{"ahm"})))]
-        (assert-message (first (.extraMessages res))
+        (assert-message (first (.secondaryMessages res))
           I18N$Key/DID_YOU_MEAN
           "ahm")))
 
@@ -210,7 +210,7 @@
                         ""
                         (location 7 4))
                     (.element (QName. "urn:vdx:test" "sandwich"))))]
-        (assert-message (first (.extraMessages res))
+        (assert-message (first (.secondaryMessages res))
           I18N$Key/ELEMENT_IS_ALLOWED_ON
           "sandwich" [["foo" "bar" "sandwiches"] ["omelet" "sandwiches"]])))))
 
@@ -223,6 +223,6 @@
                       "foo"
                       (location 1 1))
                   (.fallbackMessage "bar")))]
-      (assert-message (first (.messages res))
+      (assert-message (first (.primaryMessages res))
         I18N$Key/PASSTHRU "bar"))))
 

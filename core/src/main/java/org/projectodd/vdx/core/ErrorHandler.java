@@ -34,41 +34,45 @@ public interface ErrorHandler {
             return this;
         }
 
-        public HandledResult message(Message message) {
+        public HandledResult primaryMessage(Message message) {
             if (message != null) {
-                this.messages.add(message);
+                this.primaryMessages.add(message);
             }
 
             return this;
         }
 
-        public HandledResult message(final I18N.Key key, Object... args) {
-            return message(new Message(key, args));
+        public HandledResult primaryMessage(final I18N.Key key, Object... args) {
+            return primaryMessage(new Message(key, args));
         }
 
-        public HandledResult extraMessage(Message extraMessage) {
+        public List<Message> primaryMessages() {
+            return Collections.unmodifiableList(primaryMessages);
+        }
+
+        public HandledResult secondaryMessage(Message extraMessage) {
             if (extraMessage != null) {
-                this.extraMessages.add(extraMessage);
+                this.secondaryMessages.add(extraMessage);
             }
 
             return this;
         }
 
-        public HandledResult extraMessage(final I18N.Key key, Object... args) {
-            return extraMessage(new Message(key, args));
+        public HandledResult secondaryMessage(final I18N.Key key, Object... args) {
+            return secondaryMessage(new Message(key, args));
         }
 
-        public List<Message> extraMessages() {
-            return Collections.unmodifiableList(extraMessages);
+        public List<Message> secondaryMessages() {
+            return Collections.unmodifiableList(secondaryMessages);
         }
 
-        public List<HandledResult> extraResults() {
-            return Collections.unmodifiableList(extraResults);
+        public List<HandledResult> secondaryResults() {
+            return Collections.unmodifiableList(secondaryResults);
         }
 
-        public HandledResult extraResult(final HandledResult extraResult) {
+        public HandledResult secondaryResult(final HandledResult extraResult) {
             if (extraResult != null) {
-                this.extraResults.add(extraResult);
+                this.secondaryResults.add(extraResult);
             }
 
             return this;
@@ -86,23 +90,19 @@ public interface ErrorHandler {
             return originalMessage;
         }
 
-        public List<Message> messages() {
-            return Collections.unmodifiableList(messages);
-        }
-
 
         public String toString() {
             return "[line=" + line + ", column=" + column + ", originalMessage='" +
-                    originalMessage + "', messages=" + messages + ", extraMessages=" +
-                    extraMessages + "]";
+                    originalMessage + "', primaryMessages=" + primaryMessages + ", secondaryMessages=" +
+                    secondaryMessages + "]";
         }
 
         private int line;
         private int column;
         private final String originalMessage;
-        private List<Message> messages = new ArrayList<>();
-        private List<Message> extraMessages = new ArrayList<>();
-        private List<HandledResult> extraResults = new ArrayList<>();
+        private List<Message> primaryMessages = new ArrayList<>();
+        private List<Message> secondaryMessages = new ArrayList<>();
+        private List<HandledResult> secondaryResults = new ArrayList<>();
     }
 
 }

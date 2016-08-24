@@ -9,7 +9,7 @@ public class UnknownErrorHandler implements ErrorHandler {
     @Override
     public HandledResult handle(ValidationContext ctx, ValidationError err) {
         return HandledResult.from(err)
-                .message(I18N.Key.PASSTHRU,
-                         err.fallbackMessage() != null ? err.fallbackMessage() : err.message());
+                .primaryMessage(I18N.Key.PASSTHRU,
+                                err.fallbackMessage() != null ? err.fallbackMessage() : err.message());
     }
 }

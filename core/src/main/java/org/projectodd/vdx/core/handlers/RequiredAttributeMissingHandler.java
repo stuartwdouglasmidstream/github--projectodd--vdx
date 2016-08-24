@@ -16,11 +16,11 @@ public class RequiredAttributeMissingHandler implements ErrorHandler {
         final Set<String> alts = error.alternatives();
 
         final HandledResult result = HandledResult.from(error)
-                .message(I18N.Key.ATTRIBUTE_REQUIRED_MISSING, el);
+                .primaryMessage(I18N.Key.ATTRIBUTE_REQUIRED_MISSING, el);
 
         if (!alts.isEmpty()) {
-            result.extraMessage(I18N.Key.ATTRIBUTE_REQUIRED_MISSING_LIST, el,
-                    Util.asSortedList(alts).stream()
+            result.secondaryMessage(I18N.Key.ATTRIBUTE_REQUIRED_MISSING_LIST, el,
+                                    Util.asSortedList(alts).stream()
                             .map(String::toLowerCase)
                             .collect(Collectors.toList()));
         }

@@ -1,5 +1,9 @@
 package org.projectodd.vdx.core;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import javax.xml.stream.Location;
 
 public interface ErrorHandler {
@@ -20,16 +24,21 @@ public interface ErrorHandler {
 
         public HandledResult line(int line) {
             this.line = line;
+
             return this;
         }
 
         public HandledResult column(int column) {
             this.column = column;
+
             return this;
         }
 
         public HandledResult message(Message message) {
-            this.message = message;
+            if (message != null) {
+                this.messages.add(message);
+            }
+
             return this;
         }
 
@@ -38,7 +47,10 @@ public interface ErrorHandler {
         }
 
         public HandledResult extraMessage(Message extraMessage) {
-            this.extraMessage = extraMessage;
+            if (extraMessage != null) {
+                this.extraMessages.add(extraMessage);
+            }
+
             return this;
         }
 
@@ -46,12 +58,18 @@ public interface ErrorHandler {
             return extraMessage(new Message(key, args));
         }
 
-        public HandledResult extraResult() {
-            return extraResult;
+        public List<Message> extraMessages() {
+            return Collections.unmodifiableList(extraMessages);
+        }
+
+        public List<HandledResult> extraResults() {
+            return Collections.unmodifiableList(extraResults);
         }
 
         public HandledResult extraResult(final HandledResult extraResult) {
-            this.extraResult = extraResult;
+            if (extraResult != null) {
+                this.extraResults.add(extraResult);
+            }
 
             return this;
         }
@@ -68,26 +86,23 @@ public interface ErrorHandler {
             return originalMessage;
         }
 
-        public Message message() {
-            return message;
+        public List<Message> messages() {
+            return Collections.unmodifiableList(messages);
         }
 
-        public Message extraMessage() {
-            return extraMessage;
-        }
 
         public String toString() {
             return "[line=" + line + ", column=" + column + ", originalMessage='" +
-                    originalMessage + "', message='" + message + "', extraMessage='" +
-                    extraMessage + "']";
+                    originalMessage + "', messages=" + messages + ", extraMessages=" +
+                    extraMessages + "]";
         }
 
         private int line;
         private int column;
         private final String originalMessage;
-        private Message message = null;
-        private Message extraMessage = null;
-        private HandledResult extraResult = null;
+        private List<Message> messages = new ArrayList<>();
+        private List<Message> extraMessages = new ArrayList<>();
+        private List<HandledResult> extraResults = new ArrayList<>();
     }
 
 }

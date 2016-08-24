@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.projectodd.vdx.core.schema.SchemaPathPrefixFinder;
 
@@ -73,18 +74,16 @@ public class ErrorPrinter {
         out.append('\n')
                 .append(ambleString(preambleLines, removeSpaces))
                 .append('\n')
-                .append(alignPointerMessage(maxLinumWidth + result.column() + 1 - removeSpaces, result.message()))
+                .append(alignPointerMessage(maxLinumWidth + result.column() + 1 - removeSpaces, result.messages()))
                 .append("\n")
-                .append(ambleString(postambleLines, removeSpaces))
-                .append('\n');
+                .append(ambleString(postambleLines, removeSpaces));
 
-        if (result.extraMessage() != null) {
-            out.append(result.extraMessage().toString())
-                    .append("\n");
+        if (!result.extraMessages().isEmpty()) {
+            result.extraMessages().forEach(m -> out.append("\n").append(m.toString()).append("\n"));
         }
 
-        if (result.extraResult() != null) {
-            formatResult(out, result.extraResult());
+        if (!result.extraResults().isEmpty()) {
+            result.extraResults().forEach(r -> formatResult(out, r));
         } else {
             out.append("\n");
         }
@@ -152,13 +151,18 @@ public class ErrorPrinter {
     }
 
     private static final String POINTER = "^";
-    private String alignPointerMessage(final int length, final Object msg) {
-        if (msg == null) {
+    private String alignPointerMessage(final int length, final List<Message> msg) {
+        if (msg.isEmpty()) {
 
             return String.format("%" + (length + POINTER.length()) + "s", POINTER);
         }
 
-        final String[] lines = msg.toString().split("\n");
+        // join all the messages together into one string, then split back out. This will handle individual messages that
+        // contain \n
+        final String[] lines = String.join("\n", msg.stream()
+                .map(Object::toString)
+                .collect(Collectors.toList()))
+                .split("\n");
         final StringBuilder sb = new StringBuilder();
         sb.append(String.format("%" + (length + lines[0].length() + POINTER.length() + 1) + "s", POINTER + " " + lines[0]))
                 .append('\n');

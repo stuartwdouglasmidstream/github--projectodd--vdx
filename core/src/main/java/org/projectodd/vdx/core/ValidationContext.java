@@ -76,7 +76,7 @@ public class ValidationContext {
                 .collect(Collectors.toList());
     }
 
-    private List<SchemaElement> schemaPathWithPrefix(final List<SchemaElement> path) {
+    public List<SchemaElement> schemaPathWithPrefix(final List<SchemaElement> path) {
         if (this.prefixFinder == null) {
             this.prefixFinder = p -> {
                 final List<List<DocElement>> prefixPaths = documentTree().pathsToValue(e -> e.name().equals(p.get(0).getLocalPart()));
@@ -194,6 +194,7 @@ public class ValidationContext {
         return schemaTree().pathsToValue(true, pred);
     }
 
+
     public List<SchemaElement> pathToSchemaElement(final Function<SchemaElement, Boolean> pred) {
         List<List<SchemaElement>> paths = pathsToSchemaElement(pred);
         if (!paths.isEmpty()) {
@@ -222,8 +223,6 @@ public class ValidationContext {
     }
 
     private Tree<SchemaElement> schemaTree() {
-
-
         if (this.walkedSchemas == null) {
             this.walkedSchemas = new SchemaWalker(this.schemas).walk();
         }

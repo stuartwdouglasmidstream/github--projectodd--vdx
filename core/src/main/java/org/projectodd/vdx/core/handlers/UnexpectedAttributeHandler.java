@@ -30,51 +30,47 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
         final Position pos = ctx.searchForward(loc.getLineNumber() - 1, loc.getColumnNumber(),
                                                Pattern.compile(attr + "\\s*="));
         final List<List<SchemaElement>> altElements = ctx.alternateElementsForAttribute(attr);
-
-        Message extra = null;
-
-        if (!altElements.isEmpty()) {
-            extra = new Message(I18N.Key.ATTRIBUTE_IS_ALLOWED_ON, attr, altElements);
-        } else {
-            final List<String> otherAttributes;
-
-            if (error.alternatives().isEmpty()) {
-                final List<QName> pathFromDoc =
-                        ctx.pathToDocElement(e -> e.qname().equals(error.element()) && e.encloses(error.position())).stream()
-                        .map(DocElement::qname)
-                        .collect(Collectors.toList());
-                final List<SchemaElement> schemaPath = ctx.pathsToSchemaElement(e -> e.qname().equals(error.element())).stream()
-                        .filter(x -> x.stream()
-                                .map(SchemaElement::qname)
-                                .collect(Collectors.toList())
-                                .equals(pathFromDoc))
-                        .findFirst()
-                        .orElse(Collections.EMPTY_LIST);
-
-                otherAttributes = Util.asSortedList(ctx.attributesForElement(schemaPath));
-            } else {
-                otherAttributes = Util.asSortedList(error.alternatives());
-            }
-
-            if (otherAttributes.isEmpty()) {
-                extra = new Message(I18N.Key.ELEMENT_HAS_NO_ATTRIBUTES, el);
-            } else {
-                final String altSpelling = Util.alternateSpelling(attr, otherAttributes);
-
-                if (altSpelling != null) {
-                    extra = new Message(I18N.Key.DID_YOU_MEAN, altSpelling);
-                } else {
-                    extra = new Message(I18N.Key.ATTRIBUTES_ALLOWED_HERE, otherAttributes);
-                }
-            }
-        }
-
         final HandledResult result = HandledResult.from(error)
-                .message(I18N.Key.ATTRIBUTE_NOT_ALLOWED, attr, el)
-                .extraMessage(extra);
+                .message(I18N.Key.ATTRIBUTE_NOT_ALLOWED, attr, el);
 
         if (pos != null) {
             result.line(pos.line).column(pos.col);
+        }
+
+        final List<String> otherAttributes;
+
+        if (error.alternatives().isEmpty()) {
+            final List<QName> pathFromDoc =
+                    ctx.pathToDocElement(e -> e.qname().equals(error.element()) && e.encloses(error.position())).stream()
+                            .map(DocElement::qname)
+                            .collect(Collectors.toList());
+            final List<SchemaElement> schemaPath = ctx.pathsToSchemaElement(e -> e.qname().equals(error.element())).stream()
+                    .filter(x -> ctx.schemaPathWithPrefix(x).stream()
+                            .map(SchemaElement::qname)
+                            .collect(Collectors.toList())
+                            .equals(pathFromDoc))
+                    .findFirst()
+                    .orElse(Collections.EMPTY_LIST);
+
+            otherAttributes = Util.asSortedList(ctx.attributesForElement(schemaPath));
+        } else {
+            otherAttributes = Util.asSortedList(error.alternatives());
+        }
+
+        if (!altElements.isEmpty()) {
+            result.extraMessage(I18N.Key.ATTRIBUTE_IS_ALLOWED_ON, attr, altElements);
+        }
+
+
+        if (otherAttributes.isEmpty()) {
+            result.extraMessage(I18N.Key.ELEMENT_HAS_NO_ATTRIBUTES, el);
+        } else {
+            result.message(I18N.Key.ATTRIBUTES_ALLOWED_HERE, otherAttributes);
+
+            final String altSpelling = Util.alternateSpelling(attr, otherAttributes);
+            if (altSpelling != null) {
+                result.message(I18N.Key.DID_YOU_MEAN, altSpelling);
+            }
         }
 
         return result;

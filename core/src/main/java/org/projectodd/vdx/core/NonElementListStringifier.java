@@ -33,8 +33,9 @@ public class NonElementListStringifier implements Stringifier {
         final List<?> list = (List<?>)value;
 
         final List<String> values = list.stream()
-                .limit(limit > 0 ? limit : list.size())
                 .map(Stringify::asString)
+                .distinct()
+                .limit(limit > 0 ? limit : list.size())
                 .collect(Collectors.toList());
 
         final StringBuilder sb = new StringBuilder();

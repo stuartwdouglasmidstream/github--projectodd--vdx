@@ -23,10 +23,9 @@ public class DuplicateElementHandler implements ErrorHandler {
             result.primaryMessage(I18N.Key.ELEMENT_DUPLICATED, el);
         }
 
-        final List<DocElement> path =
-                ctx.pathToDocElement(e -> e.qname().equals(error.element()) && e.encloses(error.position()));
+        final List<DocElement> path = ctx.pathToDocElement(error.element(), error.position());
 
-        if (path != null) {
+        if (!path.isEmpty()) {
             final List<List<DocElement>> docElements =
                     ctx.docElementSiblings(path, e -> e.qname().equals(error.element()) &&
                             (attr == null || attrValue.equals(e.attributes().get(attr))));

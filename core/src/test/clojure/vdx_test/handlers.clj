@@ -187,7 +187,7 @@
                         (location 6 4))
                     (.element (QName. "urn:vdx:test" "ham"))
                     (.alternatives #{"abcdefg"})))]
-        (assert-message (first (.secondaryMessages res))
+        (assert-message (second (.primaryMessages res))
           I18N$Key/ELEMENTS_ALLOWED_HERE
           ["abcdefg"])))
 
@@ -199,9 +199,12 @@
                         (location 6 4))
                     (.element (QName. "urn:vdx:test" "ham"))
                     (.alternatives #{"ahm"})))]
-        (assert-message (first (.secondaryMessages res))
+        (assert-message (second (.primaryMessages res))
           I18N$Key/DID_YOU_MEAN
-          "ahm")))
+          "ahm")
+        (assert-message (nth (.primaryMessages res) 2)
+          I18N$Key/ELEMENTS_ALLOWED_HERE
+          ["ahm"])))
 
     (testing "matchable element"
       (let [res (.handle (UnexpectedElementHandler.)

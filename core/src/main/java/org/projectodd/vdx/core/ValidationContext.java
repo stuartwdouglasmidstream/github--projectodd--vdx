@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
@@ -20,8 +21,6 @@ import javax.xml.namespace.QName;
 import org.projectodd.vdx.core.schema.SchemaElement;
 import org.projectodd.vdx.core.schema.SchemaPathPrefixFinder;
 import org.projectodd.vdx.core.schema.SchemaWalker;
-
-import static java.util.Collections.EMPTY_LIST;
 
 public class ValidationContext {
     public ValidationContext(final URL document, final List<URL> schemas) throws IOException {
@@ -88,7 +87,7 @@ public class ValidationContext {
                             .collect(Collectors.toList());
                 }
 
-                return EMPTY_LIST;
+                return Collections.emptyList();
             };
         }
 
@@ -123,6 +122,28 @@ public class ValidationContext {
         final Set<String> ret = new HashSet<>();
         if (tree != null && !tree.isRoot()) {
             ret.addAll(tree.value().attributes());
+        }
+
+        return ret;
+    }
+
+    public Set<SchemaElement> elementsForElement(final List<SchemaElement> path) {
+        Tree<SchemaElement> tree = schemaTree();
+        final Deque<SchemaElement> pathStack = new ArrayDeque<>(path);
+
+        while (tree != null && !pathStack.isEmpty()) {
+            final SchemaElement cur = pathStack.pop();
+            tree = tree.children().stream()
+                    .filter(t -> t.value().qname().equals(cur.qname()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        final Set<SchemaElement> ret = new HashSet<>();
+        if (tree != null && !tree.isRoot()) {
+            ret.addAll(tree.children().stream()
+                               .map(Tree::value)
+                               .collect(Collectors.toList()));
         }
 
         return ret;
@@ -187,7 +208,13 @@ public class ValidationContext {
             return paths.get(0);
         }
 
-        return null;
+        return Collections.emptyList();
+    }
+
+    public List<DocElement> pathToDocElement(final QName elementName, final Position position) {
+        return pathToDocElement(e -> {
+            return e.qname().equals(elementName) && e.encloses(position);
+        });
     }
 
     public List<List<SchemaElement>> pathsToSchemaElement(final Function<SchemaElement, Boolean> pred) {
@@ -202,7 +229,22 @@ public class ValidationContext {
             return paths.get(0);
         }
 
-        return null;
+        return Collections.emptyList();
+    }
+
+    public List<SchemaElement> mapDocLocationToSchemaPath(final QName elementName, final Position position) {
+        final List<QName> pathFromDoc = pathToDocElement(elementName, position).stream()
+                .map(DocElement::qname)
+                .collect(Collectors.toList());
+
+        return pathsToSchemaElement(e -> e.qname().equals(elementName)).stream()
+                .filter(p -> schemaPathWithPrefix(p).stream()
+                        .map(SchemaElement::qname)
+                        .collect(Collectors.toList())
+                        .equals(pathFromDoc))
+                .findFirst()
+                .orElse(Collections.emptyList());
+
     }
 
     public List<List<DocElement>> docElementSiblings(final List<DocElement> element, final Function<DocElement, Boolean> pred) {

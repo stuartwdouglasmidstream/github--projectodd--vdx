@@ -39,17 +39,7 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
         final List<String> otherAttributes;
 
         if (error.alternatives().isEmpty()) {
-            final List<QName> pathFromDoc =
-                    ctx.pathToDocElement(e -> e.qname().equals(error.element()) && e.encloses(error.position())).stream()
-                            .map(DocElement::qname)
-                            .collect(Collectors.toList());
-            final List<SchemaElement> schemaPath = ctx.pathsToSchemaElement(e -> e.qname().equals(error.element())).stream()
-                    .filter(p -> ctx.schemaPathWithPrefix(p).stream()
-                            .map(SchemaElement::qname)
-                            .collect(Collectors.toList())
-                            .equals(pathFromDoc))
-                    .findFirst()
-                    .orElse(Collections.EMPTY_LIST);
+            final List<SchemaElement> schemaPath = ctx.mapDocLocationToSchemaPath(error.element(), error.position());
 
             otherAttributes = Util.asSortedList(ctx.attributesForElement(schemaPath));
         } else {

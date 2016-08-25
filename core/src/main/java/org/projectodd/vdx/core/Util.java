@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -115,6 +116,15 @@ public class Util {
         return String.join(" > ", path);
     }
 
+    public static Function<String, String> possiblyUnderscoredName(final Set<String> possibles) {
+        return s -> {
+            if (possibles.contains(s)) return s;
+            final String sans_ = s.replace("_", "-");
+            if (possibles.contains(sans_)) return sans_;
+
+            return s;
+        };
+    }
 
     // from https://git-wip-us.apache.org/repos/asf?p=commons-lang.git;a=blob;f=src/main/java/org/apache/commons/lang3/StringUtils.java;h=9bc6396575dc0df33ec224fe14bc483df0b9d8d3;hb=HEAD
 

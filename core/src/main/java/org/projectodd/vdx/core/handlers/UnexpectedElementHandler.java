@@ -26,7 +26,7 @@ public class UnexpectedElementHandler implements ErrorHandler {
         final List<DocElement> path =
                 ctx.pathToDocElement(e -> e.qname().equals(el) && e.encloses(error.position()));
 
-        if (path != null) {
+        if (!path.isEmpty()) {
             if (!ctx.docElementSiblings(path, e -> e.qname().equals(el)).isEmpty()) {
 
                 return new DuplicateElementHandler().handle(ctx,
@@ -36,12 +36,13 @@ public class UnexpectedElementHandler implements ErrorHandler {
 
         }
 
-        Message extra = null;
+        final HandledResult response = HandledResult.from(error)
+                .primaryMessage(I18N.Key.ELEMENT_NOT_ALLOWED, elName);
 
         if (!altElements.isEmpty()) {
-            extra = new Message(I18N.Key.ELEMENT_IS_ALLOWED_ON,
-                                elName,
-                                altElements);
+            response.secondaryMessage(I18N.Key.ELEMENT_IS_ALLOWED_ON,
+                                      elName,
+                                      altElements);
         } else {
             // TODO: find legal elements for current parent (do we know enough to do this?) - issue #8
             final List<String> otherElements = Util.asSortedList(error.alternatives());
@@ -50,15 +51,13 @@ public class UnexpectedElementHandler implements ErrorHandler {
                 final String altSpelling = Util.alternateSpelling(elName, otherElements);
 
                 if (altSpelling != null) {
-                    extra = new Message(I18N.Key.DID_YOU_MEAN, altSpelling);
-                } else {
-                    extra = new Message(I18N.Key.ELEMENTS_ALLOWED_HERE, otherElements);
+                    response.primaryMessage(I18N.Key.DID_YOU_MEAN, altSpelling);
                 }
+
+                response.primaryMessage(I18N.Key.ELEMENTS_ALLOWED_HERE, otherElements);
             }
         }
 
-        return HandledResult.from(error)
-                .primaryMessage(I18N.Key.ELEMENT_NOT_ALLOWED, elName)
-                .secondaryMessage(extra);
+        return response;
     }
 }

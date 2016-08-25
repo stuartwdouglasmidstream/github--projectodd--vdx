@@ -232,25 +232,43 @@ public class ValidationContext {
         return Collections.emptyList();
     }
 
-    public List<SchemaElement> mapDocLocationToSchemaPath(final QName elementName, final Position position) {
-        final List<QName> pathFromDoc = pathToDocElement(elementName, position).stream()
+    public List<SchemaElement> mapDocPathToSchemaPath(List<DocElement> path) {
+        final List<QName> pathQnames = path.stream()
                 .map(DocElement::qname)
                 .collect(Collectors.toList());
+        final QName elementName = pathQnames.get(pathQnames.size() - 1);
 
         return pathsToSchemaElement(e -> e.qname().equals(elementName)).stream()
                 .filter(p -> schemaPathWithPrefix(p).stream()
                         .map(SchemaElement::qname)
                         .collect(Collectors.toList())
-                        .equals(pathFromDoc))
+                        .equals(pathQnames))
                 .findFirst()
                 .orElse(Collections.emptyList());
+    }
 
+    public List<SchemaElement> mapDocLocationToSchemaPath(final QName elementName, final Position position) {
+        return mapDocPathToSchemaPath(pathToDocElement(elementName, position));
     }
 
     public List<List<DocElement>> docElementSiblings(final List<DocElement> element, final Function<DocElement, Boolean> pred) {
         final List<DocElement> parentPath = element.subList(0, element.size() - 1);
 
         return pathsToDocElement(pred).stream()
+                .filter(p -> !p.equals(element))
+                .filter(p -> p.subList(0, p.size() - 1).equals(parentPath))
+                .collect(Collectors.toList());
+    }
+
+    public List<List<SchemaElement>> schemaElementSiblings(final List<SchemaElement> element) {
+        return schemaElementSiblings(element, __ -> true);
+    }
+
+    public List<List<SchemaElement>> schemaElementSiblings(final List<SchemaElement> element,
+                                                           final Function<SchemaElement, Boolean> pred) {
+        final List<SchemaElement> parentPath = element.subList(0, element.size() - 1);
+
+        return pathsToSchemaElement(pred).stream()
                 .filter(p -> !p.equals(element))
                 .filter(p -> p.subList(0, p.size() - 1).equals(parentPath))
                 .collect(Collectors.toList());

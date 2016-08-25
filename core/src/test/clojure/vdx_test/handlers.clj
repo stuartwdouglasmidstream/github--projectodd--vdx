@@ -200,11 +200,25 @@
                     (.element (QName. "urn:vdx:test" "ham"))
                     (.alternatives #{"ahm"})))]
         (assert-message (second (.primaryMessages res))
-          I18N$Key/DID_YOU_MEAN
-          "ahm")
-        (assert-message (nth (.primaryMessages res) 2)
           I18N$Key/ELEMENTS_ALLOWED_HERE
-          ["ahm"])))
+          ["ahm"])
+        (assert-message (nth (.primaryMessages res) 2)
+          I18N$Key/DID_YOU_MEAN
+          "ahm")))
+
+    (testing "misspelled element without provided alternatives"
+      (let [res (.handle (UnexpectedElementHandler.)
+                  ctx
+                  (-> (ValidationError. ErrorType/UNEXPECTED_ELEMENT
+                        ""
+                        (location 6 4))
+                    (.element (QName. "urn:vdx:test" "ham"))))]
+        (assert-message (second (.primaryMessages res))
+          I18N$Key/ELEMENTS_ALLOWED_HERE
+          ["bar" "biscuit"])
+        (assert-message (nth (.primaryMessages res) 2)
+          I18N$Key/DID_YOU_MEAN
+          "bar")))
 
     (testing "matchable element"
       (let [res (.handle (UnexpectedElementHandler.)

@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.projectodd.vdx.core.schema.SchemaPathPrefixFinder;
+import org.projectodd.vdx.core.schema.SchemaPathPrefixProvider;
 
 public class ErrorPrinter {
     public ErrorPrinter(final URL document, final List<URL> schemas) throws IOException {
@@ -53,8 +53,8 @@ public class ErrorPrinter {
         return this;
     }
 
-    public ErrorPrinter prefixFinder(final SchemaPathPrefixFinder prefixFinder) {
-        this.context.prefixFinder(prefixFinder);
+    public ErrorPrinter prefixProvider(final SchemaPathPrefixProvider prefixProvider) {
+        this.context.prefixProvider(prefixProvider);
 
         return this;
     }

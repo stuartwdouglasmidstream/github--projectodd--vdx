@@ -34,6 +34,7 @@ public class I18N {
 
         ORIGINAL_ERROR,
         PASSTHRU,
+        PRINT_FAILURE,
         VALIDATION_ERROR_IN;
 
         @Override
@@ -57,7 +58,11 @@ public class I18N {
     }
 
     public static String validationErrorIn(final String docName) {
-        return "OPVDX001: " + format(I18N.Key.VALIDATION_ERROR_IN, docName);
+        return format(I18N.Key.VALIDATION_ERROR_IN, "OPVDX001", docName);
+    }
+
+    public static String failedToPrintError(final Throwable ex) {
+        return format(Key.PRINT_FAILURE, "OPVDX002", ex.getMessage());
     }
 
     private static Locale activeLocale() {

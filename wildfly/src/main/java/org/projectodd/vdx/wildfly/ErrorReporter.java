@@ -1,0 +1,90 @@
+package org.projectodd.vdx.wildfly;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+
+import org.jboss.logging.BasicLogger;
+import org.projectodd.vdx.core.ErrorPrinter;
+import org.projectodd.vdx.core.ErrorType;
+import org.projectodd.vdx.core.I18N;
+import org.projectodd.vdx.core.Stringifier;
+import org.projectodd.vdx.core.ValidationError;
+
+public class ErrorReporter {
+    public ErrorReporter(final File document, final File schemaRoot, final QName rootElement, final BasicLogger logger) {
+        this.document = document;
+        this.schemaRoot = schemaRoot;
+        this.rootElement = rootElement;
+        this.logger = logger;
+    }
+
+    /**
+     * Reports an error to VDX.
+     * @param exception
+     * @return true if the error was actually printed
+     */
+    public boolean report(final XMLStreamException exception) {
+        final ValidationError error;
+        if (exception instanceof XMLStreamValidationException) {
+            error = ((XMLStreamValidationException)exception).getValidationError();
+        } else {
+            error = ValidationError.from(exception, ErrorType.UNKNOWN_ERROR);
+            // attempt to strip the message code
+            final Matcher m = Pattern.compile("Message: \"?([A-Z]+\\d+: )?(.*?)\"?$").matcher(exception.getMessage());
+            if (m.find()) {
+                error.fallbackMessage(m.group(2));
+            }
+        }
+
+        boolean printed = false;
+
+        try {
+            final File[] schemaFiles = this.schemaRoot.listFiles();
+            if (this.schemaRoot.exists() && schemaFiles != null) {
+                printed = true;
+
+                final List<URL> schemas = Arrays.stream(schemaFiles)
+                        .filter(f -> f.getName().endsWith(".xsd"))
+                        .map(f -> {
+                            try {
+                                return f.toURI().toURL();
+                            } catch (MalformedURLException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        })
+                        .collect(Collectors.toList());
+
+                final List<Stringifier> stringifiers = new ArrayList<>();
+                stringifiers.add(new SubsystemStringifier());
+
+                new ErrorPrinter(this.document.toURI().toURL(), schemas)
+                        .printer(new LoggingPrinter(this.logger))
+                        .stringifiers(stringifiers)
+                        .prefixProvider(new PrefixProvider(this.rootElement))
+                        .print(error);
+            }
+        } catch (Exception ex) {
+            printed = false;
+            this.logger.info(I18N.failedToPrintError(ex));
+        }
+
+        return printed;
+    }
+
+    private final File document;
+    private final File schemaRoot;
+    private final QName rootElement;
+    private final BasicLogger logger;
+
+
+}

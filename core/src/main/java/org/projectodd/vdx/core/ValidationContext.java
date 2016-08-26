@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import javax.xml.namespace.QName;
 
 import org.projectodd.vdx.core.schema.SchemaElement;
-import org.projectodd.vdx.core.schema.SchemaPathPrefixFinder;
+import org.projectodd.vdx.core.schema.SchemaPathPrefixProvider;
 import org.projectodd.vdx.core.schema.SchemaWalker;
 
 public class ValidationContext {
@@ -37,8 +37,8 @@ public class ValidationContext {
         }
     }
 
-    public ValidationContext prefixFinder(final SchemaPathPrefixFinder finder) {
-        this.prefixFinder = finder;
+    public ValidationContext prefixProvider(final SchemaPathPrefixProvider provider) {
+        this.prefixProvider = provider;
 
         return this;
     }
@@ -76,8 +76,8 @@ public class ValidationContext {
     }
 
     public List<SchemaElement> schemaPathWithPrefix(final List<SchemaElement> path) {
-        if (this.prefixFinder == null) {
-            this.prefixFinder = p -> {
+        if (this.prefixProvider == null) {
+            this.prefixProvider = p -> {
                 final List<List<DocElement>> prefixPaths = documentTree().pathsToValue(e -> e.name().equals(p.get(0).getLocalPart()));
 
                 if (!prefixPaths.isEmpty()) {
@@ -91,7 +91,7 @@ public class ValidationContext {
             };
         }
 
-        final List<QName> prefix = this.prefixFinder.prefixFor(path.stream()
+        final List<QName> prefix = this.prefixProvider.prefixFor(path.stream()
                                                                        .map(SchemaElement::qname)
                                                                        .collect(Collectors.toList()));
         if (prefix != null && !prefix.isEmpty()) {
@@ -295,5 +295,5 @@ public class ValidationContext {
     private final List<URL> schemas = new ArrayList<>();
     private Tree<SchemaElement> walkedSchemas = null;
     private Tree<DocElement> walkedDoc = null;
-    private SchemaPathPrefixFinder prefixFinder = null;
+    private SchemaPathPrefixProvider prefixProvider = null;
 }

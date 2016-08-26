@@ -46,6 +46,7 @@
 
   <modules>
     <module>core</module>
+    <module>wildfly</module>
   </modules>
 
   <dependencyManagement>

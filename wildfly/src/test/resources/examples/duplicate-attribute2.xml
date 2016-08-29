@@ -121,8 +121,7 @@
             <default-job-repository name="in-memory"/>
             <default-thread-pool name="batch"/>
             <job-repository name="in-memory">
-              <jdbc data-source="foo"
-                    data-source="bar"/>
+                <jdbc data-source="foo"/>
             </job-repository>
             <thread-pool name="batch">
                 <max-threads count="10"/>
@@ -296,9 +295,8 @@
             <remote-naming/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:pojo:1.0"/>
-        <subsystem xmlns="urn:jboss:domain:remoting:3.0">
-            <endpoint/>
-            <http-connector name="http-remoting-connector" connector-ref="default" security-realm="ApplicationRealm"/>
+        <subsystem xmlns="urn:jboss:domain:remoting:1.0">
+          <worker-thread-pool worker-read-threads="1" worker-read-threads="1"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:resource-adapters:4.0"/>
         <subsystem xmlns="urn:jboss:domain:request-controller:1.0"/>

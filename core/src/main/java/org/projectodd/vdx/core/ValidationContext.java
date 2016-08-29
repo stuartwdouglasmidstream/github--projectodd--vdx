@@ -228,9 +228,7 @@ public class ValidationContext {
     }
 
     public List<DocElement> pathToDocElement(final QName elementName, final Position position) {
-        return pathToDocElement(e -> {
-            return e.qname().equals(elementName) && e.encloses(position);
-        });
+        return pathToDocElement(e -> e.qname().equals(elementName) && e.encloses(position));
     }
 
     public List<List<SchemaElement>> pathsToSchemaElement(final Function<SchemaElement, Boolean> pred) {

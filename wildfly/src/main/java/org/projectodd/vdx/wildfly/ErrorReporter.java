@@ -54,11 +54,21 @@ public class ErrorReporter {
         if (exception instanceof XMLStreamValidationException) {
             error = ((XMLStreamValidationException)exception).getValidationError();
         } else {
-            error = ValidationError.from(exception, ErrorType.UNKNOWN_ERROR);
-            // attempt to strip the message code
-            final Matcher m = Pattern.compile("Message: \"?([A-Z]+\\d+: )?(.*?)\"?$").matcher(exception.getMessage());
-            if (m.find()) {
-                error.fallbackMessage(m.group(2));
+            final String message = exception.getMessage();
+
+            // detect duplicate attribute - this message comes from woodstox, and isn't i18n, so we don't have to
+            // worry about other languages
+            final Matcher dupMatcher = Pattern.compile("^Duplicate attribute '(.+?)'\\.").matcher(message);
+            if (dupMatcher.find()) {
+                error = ValidationError.from(exception, ErrorType.DUPLICATE_ATTRIBUTE)
+                        .attribute(QName.valueOf(dupMatcher.group(1)));
+            } else {
+                error = ValidationError.from(exception, ErrorType.UNKNOWN_ERROR);
+                // attempt to strip the message code
+                final Matcher m = Pattern.compile("Message: \"?([A-Z]+\\d+: )?(.*?)\"?$").matcher(message);
+                if (m.find()) {
+                    error.fallbackMessage(m.group(2));
+                }
             }
         }
 

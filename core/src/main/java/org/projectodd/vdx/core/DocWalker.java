@@ -115,9 +115,7 @@ public class DocWalker {
             final XMLReader reader = parser.getXMLReader();
             reader.setContentHandler(handler);
             reader.parse(new InputSource(in));
-        } catch (IOException | ParserConfigurationException | SAXException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException | ParserConfigurationException | SAXException ignored) {}
 
         return tree;
     }

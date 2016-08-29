@@ -10,6 +10,7 @@ fi
 config_dir="${wf_dir}/standalone/configuration"
 base_dir="$(dirname $0)/.."
 src_dir="${base_dir}/src/test/resources/examples"
+
 for f in ${src_dir}/*.xml; do
     path=$(realpath $f)
     config_name=$(basename $path)
@@ -23,6 +24,5 @@ for f in ${src_dir}/*.xml; do
     ln -s $path $config_file
     ${wf_dir}/bin/standalone.sh -c $config_name
     rm $config_file
-    
 done
 

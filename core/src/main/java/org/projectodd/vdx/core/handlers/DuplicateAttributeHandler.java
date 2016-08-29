@@ -57,8 +57,7 @@ public class DuplicateAttributeHandler implements ErrorHandler {
 
             if (firstPos != null) {
                 result.secondaryMessage(I18N.Key.ATTRIBUTE_DUPLICATED_FIRST_OCCURRENCE, attr)
-                        .secondaryResult(new HandledResult(firstPos.line, firstPos.col + 1, null)
-                                                 .primaryMessage(I18N.Key.BLANK));
+                        .secondaryResult(new HandledResult(firstPos.line, firstPos.col + 1, null));
             }
         }
 

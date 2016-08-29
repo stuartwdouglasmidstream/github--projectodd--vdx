@@ -169,7 +169,7 @@ public class ErrorPrinter {
     private String alignPointerMessage(final int length, final List<Message> msg) {
         if (msg.isEmpty()) {
 
-            return String.format("%" + (length + POINTER.length()) + "s", POINTER);
+            return String.format("%" + (length + POINTER.length() * 3) + "s", POINTER + POINTER + POINTER);
         }
 
         // join all the messages together into one string, then split back out. This will handle individual messages that

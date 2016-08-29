@@ -63,8 +63,7 @@
           I18N$Key/ELEMENT_WITH_ATTRIBUTE_DUPLICATED "bar" "attr1" "a")
         (assert-message (first (.secondaryMessages res))
           I18N$Key/ELEMENT_WITH_ATTRIBUTE_DUPLICATED_FIRST_OCCURRENCE "bar" "attr1")
-        (assert-message (first (.primaryMessages (first (.secondaryResults res))))
-          I18N$Key/BLANK)))
+        (is (empty? (.primaryMessages (first (.secondaryResults res)))))))
     (testing "without an attribute"
       (let [res (.handle (DuplicateElementHandler.)
                   ctx
@@ -76,8 +75,7 @@
           I18N$Key/ELEMENT_DUPLICATED "bar")
         (assert-message (first (.secondaryMessages res))
           I18N$Key/ELEMENT_DUPLICATED_FIRST_OCCURRENCE "bar")
-        (assert-message (first (.primaryMessages (first (.secondaryResults res))))
-          I18N$Key/BLANK)))))
+        (is (empty? (.primaryMessages (first (.secondaryResults res)))))))))
 
 (deftest test-UnexpectedAttributeHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
@@ -177,8 +175,7 @@
           I18N$Key/ELEMENT_DUPLICATED "bar")
         (assert-message (first (.secondaryMessages res))
           I18N$Key/ELEMENT_DUPLICATED_FIRST_OCCURRENCE "bar")
-        (assert-message (first (.primaryMessages (first (.secondaryResults res))))
-          I18N$Key/BLANK)))
+        (is (empty? (.primaryMessages (first (.secondaryResults res)))))))
     (testing "unmatchable element with no alternates"
       (let [res (.handle (UnexpectedElementHandler.)
                   ctx

@@ -32,8 +32,6 @@ public class I18N {
         ATTRIBUTE_REQUIRED_MISSING,
         ATTRIBUTE_REQUIRED_MISSING_LIST,
 
-        BLANK,
-
         DID_YOU_MEAN,
 
         ELEMENT_DUPLICATED,

@@ -55,8 +55,7 @@ public class DuplicateElementHandler implements ErrorHandler {
                     } else {
                         result.secondaryMessage(I18N.Key.ELEMENT_DUPLICATED_FIRST_OCCURRENCE, el);
                     }
-                    result.secondaryResult(new HandledResult(otherEl.startPosition().line, otherEl.startPosition().col, null)
-                                               .primaryMessage(I18N.Key.BLANK));
+                    result.secondaryResult(new HandledResult(otherEl.startPosition().line, otherEl.startPosition().col, null));
                 }
             }
         }

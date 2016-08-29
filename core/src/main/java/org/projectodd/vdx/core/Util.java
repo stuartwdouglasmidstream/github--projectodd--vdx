@@ -107,10 +107,13 @@ public class Util {
     }
 
     public static String withPrefix(final String prefix, final String v) {
+        final boolean addNewLine = v.endsWith("\n");
+
         return String.join("\n",
                            Arrays.stream(v.split("\\n"))
                                    .map(x -> String.format("%s%s", prefix, x))
-                                   .collect(Collectors.toList()));
+                                   .collect(Collectors.toList()))
+                + (addNewLine ? "\n" : "");
     }
 
     @SuppressWarnings("unchecked")

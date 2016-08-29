@@ -87,14 +87,13 @@ public class ErrorPrinter {
 
 
         out.append('\n')
-                .append(ambleString(preambleLines, removeSpaces))
-                .append('\n')
-                .append(alignPointerMessage(maxLinumWidth + result.column() + 1 - removeSpaces, result.primaryMessages()))
+                .append(Util.withPrefix(" ", ambleString(preambleLines, removeSpaces)))
+                .append(alignPointerMessage(maxLinumWidth + result.column() + 2 - removeSpaces, result.primaryMessages()))
                 .append("\n")
-                .append(ambleString(postambleLines, removeSpaces));
+                .append(Util.withPrefix(" ", ambleString(postambleLines, removeSpaces)));
 
         if (!result.secondaryMessages().isEmpty()) {
-            result.secondaryMessages().forEach(m -> out.append("\n").append(m.toString()).append("\n"));
+            result.secondaryMessages().forEach(m -> out.append("\n").append(Util.withPrefix(" ", m.toString())).append("\n"));
         }
 
         if (!result.secondaryResults().isEmpty()) {
@@ -104,8 +103,8 @@ public class ErrorPrinter {
         }
 
         if (result.originalMessage() != null) {
-            out.append(I18N.lookup(I18N.Key.ORIGINAL_ERROR)).append("\n")
-                    .append(Util.withPrefix("> ", result.originalMessage())).append("\n\n");
+            out.append(Util.withPrefix(" ", I18N.lookup(I18N.Key.ORIGINAL_ERROR))).append("\n")
+                    .append(Util.withPrefix(" > ", result.originalMessage())).append("\n\n");
         }
     }
 
@@ -165,11 +164,11 @@ public class ErrorPrinter {
         return sb.toString();
     }
 
-    private static final String POINTER = "^";
+    private static final String POINTER = "^^^^";
     private String alignPointerMessage(final int length, final List<Message> msg) {
         if (msg.isEmpty()) {
 
-            return String.format("%" + (length + POINTER.length() * 3) + "s", POINTER + POINTER + POINTER);
+            return String.format("%" + (length + POINTER.length()) + "s\n", POINTER);
         }
 
         // join all the messages together into one string, then split back out. This will handle individual messages that

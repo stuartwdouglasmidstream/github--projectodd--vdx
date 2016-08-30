@@ -64,6 +64,7 @@
         (assert-message (first (.secondaryMessages res))
           I18N$Key/ELEMENT_WITH_ATTRIBUTE_DUPLICATED_FIRST_OCCURRENCE "bar" "attr1")
         (is (empty? (.primaryMessages (first (.secondaryResults res)))))))
+    
     (testing "without an attribute"
       (let [res (.handle (DuplicateElementHandler.)
                   ctx
@@ -72,7 +73,7 @@
                         (location 7 4))
                     (.element (QName. "urn:vdx:test" "bar"))))]
         (assert-message (first (.primaryMessages res))
-          I18N$Key/ELEMENT_DUPLICATED "bar")
+          I18N$Key/ELEMENT_DUPLICATED "bar" "foo")
         (assert-message (first (.secondaryMessages res))
           I18N$Key/ELEMENT_DUPLICATED_FIRST_OCCURRENCE "bar")
         (is (empty? (.primaryMessages (first (.secondaryResults res)))))))))
@@ -172,10 +173,11 @@
                         (location 7 4))
                     (.element (QName. "urn:vdx:test" "bar"))))]
         (assert-message (first (.primaryMessages res))
-          I18N$Key/ELEMENT_DUPLICATED "bar")
+          I18N$Key/ELEMENT_DUPLICATED "bar" "foo")
         (assert-message (first (.secondaryMessages res))
           I18N$Key/ELEMENT_DUPLICATED_FIRST_OCCURRENCE "bar")
         (is (empty? (.primaryMessages (first (.secondaryResults res)))))))
+    
     (testing "unmatchable element with no alternates"
       (let [res (.handle (UnexpectedElementHandler.)
                   ctx
@@ -254,3 +256,39 @@
       (assert-message (first (.primaryMessages res))
         I18N$Key/PASSTHRU "bar"))))
 
+(deftest test-UnsupportedElementHandler
+  (let [ctx (ValidationContext. (io/resource "handler-test.xml")
+              [(io/resource "schemas/handler-test.xsd")])]
+    (testing "with alternatives"
+      (let [res (.handle (UnsupportedElementHandler.)
+                  ctx
+                  (-> (ValidationError. ErrorType/UNSUPPORTED_ELEMENT
+                        ""
+                        (location 7 4))
+                    (.element (QName. "urn:vdx:test" "bar"))
+                    (.alternatives #{"barr"})))]
+        (assert-message (first (.primaryMessages res))
+          I18N$Key/ELEMENT_UNSUPPORTED "bar" "barr"))
+
+      (testing "without alternatives"
+      (let [res (.handle (UnsupportedElementHandler.)
+                  ctx
+                  (-> (ValidationError. ErrorType/UNSUPPORTED_ELEMENT
+                        ""
+                        (location 7 4))
+                    (.element (QName. "urn:vdx:test" "bar"))))]
+        (assert-message (first (.primaryMessages res))
+          I18N$Key/ELEMENT_UNSUPPORTED_NO_ALT "bar"))))
+    
+    (testing "without an attribute"
+      (let [res (.handle (DuplicateElementHandler.)
+                  ctx
+                  (-> (ValidationError. ErrorType/DUPLICATE_ELEMENT
+                        ""
+                        (location 7 4))
+                    (.element (QName. "urn:vdx:test" "bar"))))]
+        (assert-message (first (.primaryMessages res))
+          I18N$Key/ELEMENT_DUPLICATED "bar" "foo")
+        (assert-message (first (.secondaryMessages res))
+          I18N$Key/ELEMENT_DUPLICATED_FIRST_OCCURRENCE "bar")
+        (is (empty? (.primaryMessages (first (.secondaryResults res)))))))))

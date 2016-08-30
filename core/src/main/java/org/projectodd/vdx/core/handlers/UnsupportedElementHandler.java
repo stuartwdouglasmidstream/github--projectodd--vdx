@@ -28,8 +28,15 @@ public class UnsupportedElementHandler implements ErrorHandler {
     public HandledResult handle(ValidationContext ctx, ValidationError error) {
         final String el = error.element().getLocalPart();
         final Set<String> alts = error.alternatives();
+        final String alt = alts.stream().findFirst().orElse(null);
+        final HandledResult result = HandledResult.from(error);
 
-        return HandledResult.from(error)
-                .primaryMessage(I18N.Key.ELEMENT_UNSUPPORTED, el, alts.stream().findFirst().orElse(null));
+        if (alt == null) {
+            result.primaryMessage(I18N.Key.ELEMENT_UNSUPPORTED_NO_ALT, el);
+        } else {
+            result.primaryMessage(I18N.Key.ELEMENT_UNSUPPORTED, el, alt);
+        }
+
+        return result;
     }
 }

@@ -36,7 +36,14 @@ public class DuplicateElementHandler implements ErrorHandler {
         if (attr != null) {
             result.primaryMessage(I18N.Key.ELEMENT_WITH_ATTRIBUTE_DUPLICATED, el, attr, attrValue);
         } else {
-            result.primaryMessage(I18N.Key.ELEMENT_DUPLICATED, el);
+            final List<DocElement> path = ctx.pathToDocElement(error.element(), error.position());
+            String parentName = "parent";
+
+            if (!path.isEmpty() && path.size() > 1) {
+                parentName = path.get(path.size() - 2).name();
+            }
+
+            result.primaryMessage(I18N.Key.ELEMENT_DUPLICATED, el, parentName);
         }
 
         final List<DocElement> path = ctx.pathToDocElement(error.element(), error.position());

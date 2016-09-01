@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package org.projectodd.vdx.wildfly;
+package org.projectodd.vdx.core;
 
 import javax.xml.stream.XMLStreamException;
-
-import org.projectodd.vdx.core.ValidationError;
 
 public class XMLStreamValidationException extends XMLStreamException {
     public XMLStreamValidationException(final String message,

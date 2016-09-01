@@ -35,12 +35,12 @@ import org.projectodd.vdx.core.ErrorType;
 import org.projectodd.vdx.core.I18N;
 import org.projectodd.vdx.core.Stringifier;
 import org.projectodd.vdx.core.ValidationError;
+import org.projectodd.vdx.core.XMLStreamValidationException;
 
 public class ErrorReporter {
-    public ErrorReporter(final File document, final File schemaRoot, final QName rootElement, final BasicLogger logger) {
+    public ErrorReporter(final File document, final File schemaRoot, final BasicLogger logger) {
         this.document = document;
         this.schemaRoot = schemaRoot;
-        this.rootElement = rootElement;
         this.logger = logger;
     }
 
@@ -96,7 +96,7 @@ public class ErrorReporter {
                 new ErrorPrinter(this.document.toURI().toURL(), schemas)
                         .printer(new LoggingPrinter(this.logger))
                         .stringifiers(stringifiers)
-                        .prefixProvider(new PrefixProvider(this.rootElement))
+                        .prefixProvider(new PrefixProvider())
                         .print(error);
             }
         } catch (Exception ex) {
@@ -109,8 +109,5 @@ public class ErrorReporter {
 
     private final File document;
     private final File schemaRoot;
-    private final QName rootElement;
     private final BasicLogger logger;
-
-
 }

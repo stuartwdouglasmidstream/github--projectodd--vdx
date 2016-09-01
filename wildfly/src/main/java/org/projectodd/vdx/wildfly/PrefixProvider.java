@@ -22,17 +22,20 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
+import org.projectodd.vdx.core.Util;
+import org.projectodd.vdx.core.ValidationContext;
 import org.projectodd.vdx.core.schema.SchemaPathPrefixProvider;
 
 class PrefixProvider implements SchemaPathPrefixProvider {
-    PrefixProvider(final QName rootElement) {
-        this.prefix.add(rootElement);
-        this.prefix.add(new QName(rootElement.getNamespaceURI(), "profile"));
-    }
-
 
     @Override
-    public List<QName> prefixFor(final List<QName> path) {
+    public List<QName> prefixFor(final List<QName> path, final ValidationContext ctx) {
+        if (prefix.isEmpty()) {
+            final QName rootElement = Util.extractFirstElement(ctx.documentLines());
+            prefix.add(rootElement);
+            prefix.add(new QName(rootElement.getNamespaceURI(), "profile"));
+        }
+
         if (this.prefix.get(0).equals(path.get(0))) {
 
             return Collections.emptyList();

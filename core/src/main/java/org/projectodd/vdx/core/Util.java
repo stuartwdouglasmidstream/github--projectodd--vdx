@@ -31,6 +31,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.xml.namespace.QName;
+
 import org.projectodd.vdx.core.thirdparty.Levenshtein;
 
 public class Util {
@@ -46,6 +48,30 @@ public class Util {
         });
 
         return xmlnses;
+    }
+
+    private static final Pattern ELEMENT_RE = Pattern.compile("<([^?].*?)[\\s/>]");
+
+    public static QName extractFirstElement(final List<String> lines) {
+        QName name = null;
+        int idx = 0;
+        while (name == null &&
+                idx < lines.size()) {
+            final String line = lines.get(idx);
+            final Matcher elm = ELEMENT_RE.matcher(line);
+            if (elm.find()) {
+                final String el = elm.group(1);
+                final Matcher xm = XMLNS_RE.matcher(line);
+                if (xm.find()) {
+                    name = new QName(xm.group(1), el);
+                } else {
+                    name = QName.valueOf(el);
+                }
+            }
+            idx++;
+        }
+
+        return name;
     }
 
     private static final Pattern TARGET_NS_RE = Pattern.compile("targetNamespace\\s*=\\s*[\"'](.*?)[\"']");

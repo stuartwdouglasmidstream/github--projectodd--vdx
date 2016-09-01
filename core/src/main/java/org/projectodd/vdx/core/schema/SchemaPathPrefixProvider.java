@@ -20,6 +20,8 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
+import org.projectodd.vdx.core.ValidationContext;
+
 public interface SchemaPathPrefixProvider {
-    List<QName> prefixFor(List<QName> path);
+    List<QName> prefixFor(List<QName> path, ValidationContext ctx);
 }

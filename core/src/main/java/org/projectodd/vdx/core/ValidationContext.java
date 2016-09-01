@@ -63,6 +63,10 @@ public class ValidationContext {
         return this.lines.size();
     }
 
+    public List<String> documentLines() {
+        return Collections.unmodifiableList(this.lines);
+    }
+
     public List<String> extractLines(final int start, final int end) {
         final List<String> ret = new ArrayList<>();
         for (int idx = start; idx < end; idx++) {
@@ -93,7 +97,7 @@ public class ValidationContext {
 
     public List<SchemaElement> schemaPathWithPrefix(final List<SchemaElement> path) {
         if (this.prefixProvider == null) {
-            this.prefixProvider = p -> {
+            this.prefixProvider = (p, __) -> {
                 final List<List<DocElement>> prefixPaths = documentTree().pathsToValue(e -> e.name().equals(p.get(0).getLocalPart()));
 
                 if (!prefixPaths.isEmpty()) {
@@ -109,7 +113,8 @@ public class ValidationContext {
 
         final List<QName> prefix = this.prefixProvider.prefixFor(path.stream()
                                                                        .map(SchemaElement::qname)
-                                                                       .collect(Collectors.toList()));
+                                                                       .collect(Collectors.toList()),
+                                                                 this);
         if (prefix != null && !prefix.isEmpty()) {
             final List<SchemaElement> fullPath = new ArrayList<>();
             fullPath.addAll(prefix.stream()

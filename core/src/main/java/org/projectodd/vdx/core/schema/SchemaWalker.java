@@ -86,11 +86,8 @@ public class SchemaWalker {
                             currentElement = new SchemaElement(elName, qname(attributes.getValue("type")));
                             elements.put(elName, currentElement);
                         }
-                        if (currentType != null) {
-                            currentType.addElement(currentElement);
-                        } else {
-                            stack.push(stack.peek().addChild(currentElement));
-                        }
+
+                        activeStack().push(activeStack().peek().addChild(currentElement));
                         break;
 
                     case "xs:attribute":
@@ -109,6 +106,11 @@ public class SchemaWalker {
                                 currentType = new ComplexType(nameQName);
                                 types.put(nameQName, currentType);
                             }
+                            currentTypeElementsStack = new ArrayDeque<>();
+                            currentTypeElementsTree = new Tree<>();
+                            currentTypeElementsStack.push(currentTypeElementsTree);
+                        } else {
+                            innerComplexTypeDepth++;
                         }
                         break;
 
@@ -127,16 +129,22 @@ public class SchemaWalker {
             public void endElement(String uri, String localName, String qName) throws SAXException {
                 switch (qName) {
                     case "xs:element":
-                        if (stack.peek().value() != null &&
-                                currentElement.name().equals(stack.peek().value().name())) {
-                            stack.pop();
-                            currentElement = stack.peek().value();
+                        if (activeStack().peek().value() != null &&
+                                currentElement.name().equals(activeStack().peek().value().name())) {
+                            activeStack().pop();
+                            currentElement = activeStack().peek().value();
                         } else {
                             currentElement = null;
                         }
                         break;
+
                     case "xs:complexType":
-                        if (currentType != null) {
+                        if (innerComplexTypeDepth > 0) {
+                        innerComplexTypeDepth--;
+                        } else if (currentType != null) {
+                            currentType.setElements(currentTypeElementsTree);
+                            currentTypeElementsStack = null;
+                            currentTypeElementsTree = null;
                             currentType = null;
                         }
                         break;
@@ -160,9 +168,16 @@ public class SchemaWalker {
                 return new QName(uri, local);
             }
 
+            private Deque<Tree<SchemaElement>> activeStack() {
+                return currentTypeElementsStack == null ? stack : currentTypeElementsStack;
+            }
+
             private Map<String, String> namespaceMappings = null;
             private SchemaElement currentElement = null;
             private ComplexType currentType = null;
+            private Deque<Tree<SchemaElement>> currentTypeElementsStack = null;
+            private Tree<SchemaElement> currentTypeElementsTree = null;
+            private int innerComplexTypeDepth = 0;
         };
 
 
@@ -200,7 +215,7 @@ public class SchemaWalker {
                 .forEach(type -> {
                     final ComplexType baseType = this.types.get(type.base());
                     if (baseType != null) {
-                        baseType.elements().forEach(type::addElement);
+                        baseType.elements().children().forEach(t -> type.elements().addChild(t));
                         baseType.attributes().forEach(type::addAttribute);
                     }
         });
@@ -233,9 +248,11 @@ public class SchemaWalker {
     }
 
     private void applyTypeToElement(final ComplexType type, final Tree<SchemaElement> tree) {
-        if (type != null) {
+        if (type != null &&
+                !tree.value().isTypeApplied(type.name())) {
+            tree.value().addAppliedType(type.name());
             tree.value().addAttributes(type.attributes());
-            type.elements().forEach(tree::addChild);
+            type.elements().children().forEach(tree::addChild);
         }
     }
 

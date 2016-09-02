@@ -27,11 +27,13 @@
   </xs:complexType>
 
   <xs:complexType name="sandwichType">
-  </xs:complexType>
-
-  <xs:complexType name="sandwichesType">
     <xs:sequence>
-      <xs:element name="sandwich" type="sandwichType">
+      <xs:element name="bacon">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="crisp"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
     </xs:sequence>
   </xs:complexType>
@@ -45,6 +47,13 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:complexType name="sandwichesType">
+    <xs:sequence>
+      <xs:element name="sandwich" type="sandwichType">
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="breadType">
     <xs:sequence>
       <xs:element ref="filling"/>
@@ -57,8 +66,19 @@
   <xs:complexType name="biscuitType">
     <xs:complexContent>
       <xs:extension base="breadType">
+        <xs:sequence>
+          <xs:element name="gravy">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="thickness"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="sconiness"/>
+        </xs:sequence>
         <xs:attribute name="flake"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+
 </xs:schema>

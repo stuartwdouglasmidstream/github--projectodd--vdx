@@ -24,6 +24,8 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
+import org.projectodd.vdx.core.Tree;
+
 public class ComplexType {
     public ComplexType(final QName name) {
         this.name = name;
@@ -47,20 +49,25 @@ public class ComplexType {
         return Collections.unmodifiableSet(attributes);
     }
 
-    public List<SchemaElement> elements() {
-        return Collections.unmodifiableList(this.elements);
+    public Tree<SchemaElement> elements() {
+        if (this.elements == null) {
+
+            return new Tree<>();
+        }
+
+        return this.elements;
+    }
+
+    public void setElements(final Tree<SchemaElement> elements) {
+        this.elements = elements;
     }
 
     public void addAttribute(final String attr) {
         this.attributes.add(attr);
     }
 
-    public void addElement(final SchemaElement el) {
-        this.elements.add(el);
-    }
-
     private final QName name;
     private QName base = null;
     private final Set<String> attributes = new HashSet<>();
-    private final List<SchemaElement> elements = new ArrayList<>();
+    private Tree<SchemaElement> elements = null;
 }

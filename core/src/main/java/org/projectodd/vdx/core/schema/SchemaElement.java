@@ -18,6 +18,7 @@ package org.projectodd.vdx.core.schema;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -62,6 +63,14 @@ public class SchemaElement {
         } else {
             this.attributes.addAll(attrs);
         }
+    }
+
+    public void addAppliedType(final QName type) {
+        this.appliedTypes.add(type);
+    }
+
+    public boolean isTypeApplied(final QName type) {
+        return this.appliedTypes.contains(type);
     }
 
     public String name() {
@@ -149,6 +158,7 @@ public class SchemaElement {
 
     private final QName name;
     private final QName type;
+    private final Set<QName> appliedTypes = new HashSet<>();
     private boolean reference;
     private SchemaElement delegate = null;
     private QName base;

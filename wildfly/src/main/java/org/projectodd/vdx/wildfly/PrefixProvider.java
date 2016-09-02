@@ -33,6 +33,9 @@ class PrefixProvider implements SchemaPathPrefixProvider {
         if (prefix.isEmpty()) {
             final QName rootElement = Util.extractFirstElement(ctx.documentLines());
             prefix.add(rootElement);
+            if (rootElement.getLocalPart().equals("domain")) {
+                prefix.add(new QName(rootElement.getNamespaceURI(), "profiles"));
+            }
             prefix.add(new QName(rootElement.getNamespaceURI(), "profile"));
         }
 

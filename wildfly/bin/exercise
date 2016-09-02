@@ -7,22 +7,29 @@ if [ ! -d $wf_dir ]; then
     exit 1
 fi
 
-config_dir="${wf_dir}/standalone/configuration"
-base_dir="$(dirname $0)/.."
-src_dir="${base_dir}/src/test/resources/examples"
+function run_for_type {
+    config_type=$1
+        
+    config_dir="${wf_dir}/${config_type}/configuration"
+    base_dir="$(dirname $0)/.."
+    src_dir="${base_dir}/src/test/resources/examples/${config_type}"
 
-for f in ${src_dir}/*.xml; do
-    path=$(realpath $f)
-    config_name=$(basename $path)
-    config_file="${config_dir}/${config_name}"
+    for f in ${src_dir}/*.xml; do
+        path=$(realpath $f)
+        config_name=$(basename $path)
+        config_file="${config_dir}/${config_name}"
 
-    echo
-    echo
-    echo "############### EXERCISING ${config_name}"
-    echo
-    echo
-    ln -s $path $config_file
-    ${wf_dir}/bin/standalone.sh -c $config_name
-    rm $config_file
-done
+        echo
+        echo
+        echo "############### EXERCISING ${config_name} ($config_type)"
+        echo
+        echo
+        ln -s $path $config_file
+        ${wf_dir}/bin/${config_type}.sh -c $config_name
+        rm $config_file
+    done
+}
+
+run_for_type "standalone"
+run_for_type "domain"
 

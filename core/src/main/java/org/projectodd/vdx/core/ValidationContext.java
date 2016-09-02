@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import javax.xml.namespace.QName;
 
 import org.projectodd.vdx.core.schema.SchemaElement;
+import org.projectodd.vdx.core.schema.SchemaPathGate;
 import org.projectodd.vdx.core.schema.SchemaPathPrefixProvider;
 import org.projectodd.vdx.core.schema.SchemaWalker;
 
@@ -55,6 +56,12 @@ public class ValidationContext {
 
     public ValidationContext prefixProvider(final SchemaPathPrefixProvider provider) {
         this.prefixProvider = provider;
+
+        return this;
+    }
+
+    public ValidationContext pathGate(final SchemaPathGate gate) {
+        this.pathGate = gate;
 
         return this;
     }
@@ -91,8 +98,16 @@ public class ValidationContext {
     private List<List<SchemaElement>> alternateElements(final boolean includeValue, final Function<SchemaElement, Boolean> pred) {
         return schemaTree().pathsToValue(includeValue, pred)
                 .stream()
+                .filter(this::allowPath)
                 .map(this::schemaPathWithPrefix)
                 .collect(Collectors.toList());
+    }
+
+    private boolean allowPath(List<SchemaElement> path) {
+        return this.pathGate.allowPath(path.stream()
+                                               .map(SchemaElement::qname)
+                                               .collect(Collectors.toList()),
+                                       this);
     }
 
     public List<SchemaElement> schemaPathWithPrefix(final List<SchemaElement> path) {
@@ -315,4 +330,5 @@ public class ValidationContext {
     private Tree<SchemaElement> walkedSchemas = null;
     private Tree<DocElement> walkedDoc = null;
     private SchemaPathPrefixProvider prefixProvider = null;
+    private SchemaPathGate pathGate = SchemaPathGate.DEFAULT;
 }

@@ -25,6 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.projectodd.vdx.core.schema.SchemaPathGate;
 import org.projectodd.vdx.core.schema.SchemaPathPrefixProvider;
 
 public class ErrorPrinter {
@@ -65,6 +66,12 @@ public class ErrorPrinter {
         if (stringifiers != null) {
             stringifiers.forEach(Stringify::registerStringifier);
         }
+
+        return this;
+    }
+
+    public ErrorPrinter pathGate(final SchemaPathGate gate) {
+        this.context.pathGate(gate);
 
         return this;
     }

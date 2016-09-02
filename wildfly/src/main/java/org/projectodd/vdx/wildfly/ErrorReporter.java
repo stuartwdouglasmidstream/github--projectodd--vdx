@@ -93,10 +93,13 @@ public class ErrorReporter {
                 final List<Stringifier> stringifiers = new ArrayList<>();
                 stringifiers.add(new SubsystemStringifier());
 
+                SchemaDocRelationships rel = new SchemaDocRelationships();
+
                 new ErrorPrinter(this.document.toURI().toURL(), schemas)
                         .printer(new LoggingPrinter(this.logger))
                         .stringifiers(stringifiers)
-                        .prefixProvider(new PrefixProvider())
+                        .pathGate(rel)
+                        .prefixProvider(rel)
                         .print(error);
             }
         } catch (Exception ex) {

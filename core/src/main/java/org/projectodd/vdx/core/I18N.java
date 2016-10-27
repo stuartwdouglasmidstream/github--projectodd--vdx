@@ -22,6 +22,8 @@ import java.util.ResourceBundle;
 public class I18N {
 
     public enum Key {
+        AND_N_MORE,
+
         ATTRIBUTE_DUPLICATED,
         ATTRIBUTE_DUPLICATED_FIRST_OCCURRENCE,
         ATTRIBUTE_DUPLICATED_NO_ELEMENT,

@@ -62,7 +62,7 @@ public class NonElementListStringifier implements Stringifier {
             values.forEach(v -> sb.append("- ").append(v).append('\n'));
 
             if (this.limit < list.size()) {
-                sb.append(String.format("(and %s more)\n", list.size() - limit));
+                sb.append(I18N.format(I18N.Key.AND_N_MORE, list.size() - limit)).append('\n');
             }
         }
 

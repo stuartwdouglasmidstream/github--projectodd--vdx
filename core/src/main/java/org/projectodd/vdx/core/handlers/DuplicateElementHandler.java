@@ -34,7 +34,7 @@ public class DuplicateElementHandler implements ErrorHandler {
         final HandledResult result = HandledResult.from(error);
 
         if (attr != null) {
-            result.primaryMessage(I18N.Key.ELEMENT_WITH_ATTRIBUTE_DUPLICATED, el, attr, attrValue);
+            result.addPrimaryMessage(I18N.Key.ELEMENT_WITH_ATTRIBUTE_DUPLICATED, el, attr, attrValue);
         } else {
             final List<DocElement> path = ctx.pathToDocElement(error.element(), error.position());
             String parentName = "parent";
@@ -43,7 +43,7 @@ public class DuplicateElementHandler implements ErrorHandler {
                 parentName = path.get(path.size() - 2).name();
             }
 
-            result.primaryMessage(I18N.Key.ELEMENT_DUPLICATED, el, parentName);
+            result.addPrimaryMessage(I18N.Key.ELEMENT_DUPLICATED, el, parentName);
         }
 
         final List<DocElement> path = ctx.pathToDocElement(error.element(), error.position());
@@ -58,11 +58,11 @@ public class DuplicateElementHandler implements ErrorHandler {
                 if (!firstPath.isEmpty()) {
                     final DocElement otherEl = firstPath.get(firstPath.size() - 1);
                     if (attr != null) {
-                        result.secondaryMessage(I18N.Key.ELEMENT_WITH_ATTRIBUTE_DUPLICATED_FIRST_OCCURRENCE, el, attr);
+                        result.addSecondaryMessage(I18N.Key.ELEMENT_WITH_ATTRIBUTE_DUPLICATED_FIRST_OCCURRENCE, el, attr);
                     } else {
-                        result.secondaryMessage(I18N.Key.ELEMENT_DUPLICATED_FIRST_OCCURRENCE, el);
+                        result.addSecondaryMessage(I18N.Key.ELEMENT_DUPLICATED_FIRST_OCCURRENCE, el);
                     }
-                    result.secondaryResult(new HandledResult(otherEl.startPosition().line, otherEl.startPosition().col, null));
+                    result.addSecondaryResult(new HandledResult(otherEl.startPosition().line, otherEl.startPosition().col, null));
                 }
             }
         }

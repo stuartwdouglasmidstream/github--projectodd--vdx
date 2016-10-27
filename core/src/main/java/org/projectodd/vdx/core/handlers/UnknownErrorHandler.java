@@ -25,7 +25,7 @@ public class UnknownErrorHandler implements ErrorHandler {
     @Override
     public HandledResult handle(ValidationContext ctx, ValidationError err) {
         return HandledResult.from(err)
-                .primaryMessage(I18N.Key.PASSTHRU,
+                .addPrimaryMessage(I18N.Key.PASSTHRU,
                                 err.fallbackMessage() != null ? err.fallbackMessage() : err.message());
     }
 }

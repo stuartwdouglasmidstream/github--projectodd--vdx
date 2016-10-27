@@ -32,9 +32,9 @@ public class UnsupportedElementHandler implements ErrorHandler {
         final HandledResult result = HandledResult.from(error);
 
         if (alt == null) {
-            result.primaryMessage(I18N.Key.ELEMENT_UNSUPPORTED_NO_ALT, el);
+            result.addPrimaryMessage(I18N.Key.ELEMENT_UNSUPPORTED_NO_ALT, el);
         } else {
-            result.primaryMessage(I18N.Key.ELEMENT_UNSUPPORTED, el, alt);
+            result.addPrimaryMessage(I18N.Key.ELEMENT_UNSUPPORTED, el, alt);
         }
 
         return result;

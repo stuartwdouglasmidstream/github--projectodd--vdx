@@ -49,7 +49,7 @@ public class RequiredElementMissingHandler implements ErrorHandler {
                                                 Pattern.compile(String.format("<%s[ >/]", el)));
 
         final HandledResult result = HandledResult.from(error)
-                .primaryMessage(this.primaryMessageKey, el);
+                .addPrimaryMessage(this.primaryMessageKey, el);
 
         if (pos != null) {
             result.line(pos.line).column(pos.col);
@@ -61,7 +61,7 @@ public class RequiredElementMissingHandler implements ErrorHandler {
                     .map(SchemaElement::name)
                     .collect(Collectors.toSet());
 
-            result.primaryMessage(this.optionsMessageKey,
+            result.addPrimaryMessage(this.optionsMessageKey,
                                   Util.asSortedList(alts).stream()
                                           .map(String::toLowerCase)
                                           .map(Util.possiblyUnderscoredName(otherElements))

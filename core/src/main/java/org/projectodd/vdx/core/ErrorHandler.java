@@ -50,7 +50,7 @@ public interface ErrorHandler {
             return this;
         }
 
-        public HandledResult primaryMessage(Message message) {
+        public HandledResult addPrimaryMessage(Message message) {
             if (message != null) {
                 this.primaryMessages.add(message);
             }
@@ -58,15 +58,15 @@ public interface ErrorHandler {
             return this;
         }
 
-        public HandledResult primaryMessage(final I18N.Key key, Object... args) {
-            return primaryMessage(new Message(key, args));
+        public HandledResult addPrimaryMessage(final I18N.Key key, Object... args) {
+            return addPrimaryMessage(new Message(key, args));
         }
 
         public List<Message> primaryMessages() {
             return Collections.unmodifiableList(primaryMessages);
         }
 
-        public HandledResult secondaryMessage(Message extraMessage) {
+        public HandledResult addSecondaryMessage(Message extraMessage) {
             if (extraMessage != null) {
                 this.secondaryMessages.add(extraMessage);
             }
@@ -74,8 +74,8 @@ public interface ErrorHandler {
             return this;
         }
 
-        public HandledResult secondaryMessage(final I18N.Key key, Object... args) {
-            return secondaryMessage(new Message(key, args));
+        public HandledResult addSecondaryMessage(final I18N.Key key, Object... args) {
+            return addSecondaryMessage(new Message(key, args));
         }
 
         public List<Message> secondaryMessages() {
@@ -86,7 +86,7 @@ public interface ErrorHandler {
             return Collections.unmodifiableList(secondaryResults);
         }
 
-        public HandledResult secondaryResult(final HandledResult extraResult) {
+        public HandledResult addSecondaryResult(final HandledResult extraResult) {
             if (extraResult != null) {
                 this.secondaryResults.add(extraResult);
             }

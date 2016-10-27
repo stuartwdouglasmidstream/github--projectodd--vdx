@@ -26,7 +26,6 @@ import org.projectodd.vdx.core.DocElement;
 import org.projectodd.vdx.core.ErrorHandler;
 import org.projectodd.vdx.core.ErrorType;
 import org.projectodd.vdx.core.I18N;
-import org.projectodd.vdx.core.Message;
 import org.projectodd.vdx.core.schema.SchemaElement;
 import org.projectodd.vdx.core.Util;
 import org.projectodd.vdx.core.ValidationContext;
@@ -55,7 +54,7 @@ public class UnexpectedElementHandler implements ErrorHandler {
         }
 
         final HandledResult response = HandledResult.from(error)
-                .primaryMessage(I18N.Key.ELEMENT_NOT_ALLOWED, elName);
+                .addPrimaryMessage(I18N.Key.ELEMENT_NOT_ALLOWED, elName);
 
         List<String> otherElements = Collections.emptyList();
 
@@ -77,19 +76,19 @@ public class UnexpectedElementHandler implements ErrorHandler {
         }
 
         if (!altElements.isEmpty()) {
-            response.secondaryMessage(I18N.Key.ELEMENT_IS_ALLOWED_ON,
+            response.addSecondaryMessage(I18N.Key.ELEMENT_IS_ALLOWED_ON,
                                       elName,
                                       altElements);
         }
 
         if (!otherElements.isEmpty()) {
-            response.primaryMessage(I18N.Key.ELEMENTS_ALLOWED_HERE, otherElements);
-
             final String altSpelling = Util.alternateSpelling(elName, otherElements);
 
             if (altSpelling != null) {
-                response.primaryMessage(I18N.Key.DID_YOU_MEAN, altSpelling);
+                response.addPrimaryMessage(I18N.Key.DID_YOU_MEAN, altSpelling);
             }
+
+            response.addPrimaryMessage(I18N.Key.ELEMENTS_ALLOWED_HERE, otherElements);
         }
 
         return response;

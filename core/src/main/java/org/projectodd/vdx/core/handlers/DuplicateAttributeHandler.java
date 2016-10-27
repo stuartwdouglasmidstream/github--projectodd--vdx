@@ -38,9 +38,9 @@ public class DuplicateAttributeHandler implements ErrorHandler {
         final HandledResult result = HandledResult.from(error);
 
         if (el == null) {
-            result.primaryMessage(I18N.Key.ATTRIBUTE_DUPLICATED_NO_ELEMENT, attr);
+            result.addPrimaryMessage(I18N.Key.ATTRIBUTE_DUPLICATED_NO_ELEMENT, attr);
         } else {
-            result.primaryMessage(I18N.Key.ATTRIBUTE_DUPLICATED, attr, el);
+            result.addPrimaryMessage(I18N.Key.ATTRIBUTE_DUPLICATED, attr, el);
         }
 
         if (pos != null) {
@@ -56,8 +56,8 @@ public class DuplicateAttributeHandler implements ErrorHandler {
             }
 
             if (firstPos != null) {
-                result.secondaryMessage(I18N.Key.ATTRIBUTE_DUPLICATED_FIRST_OCCURRENCE, attr)
-                        .secondaryResult(new HandledResult(firstPos.line, firstPos.col + 1, null));
+                result.addSecondaryMessage(I18N.Key.ATTRIBUTE_DUPLICATED_FIRST_OCCURRENCE, attr)
+                        .addSecondaryResult(new HandledResult(firstPos.line, firstPos.col + 1, null));
             }
         }
 

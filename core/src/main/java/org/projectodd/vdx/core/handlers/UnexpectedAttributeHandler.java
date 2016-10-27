@@ -16,15 +16,11 @@
 
 package org.projectodd.vdx.core.handlers;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 
-import org.projectodd.vdx.core.DocElement;
 import org.projectodd.vdx.core.ErrorHandler;
 import org.projectodd.vdx.core.I18N;
 import org.projectodd.vdx.core.Position;
@@ -46,7 +42,7 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
                                                Pattern.compile(attr + "\\s*="));
         final List<List<SchemaElement>> altElements = ctx.alternateElementsForAttribute(attr);
         final HandledResult result = HandledResult.from(error)
-                .primaryMessage(I18N.Key.ATTRIBUTE_NOT_ALLOWED, attr, el);
+                .addPrimaryMessage(I18N.Key.ATTRIBUTE_NOT_ALLOWED, attr, el);
 
         if (pos != null) {
             result.line(pos.line).column(pos.col);
@@ -63,17 +59,17 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
         }
 
         if (!altElements.isEmpty()) {
-            result.secondaryMessage(I18N.Key.ATTRIBUTE_IS_ALLOWED_ON, attr, altElements);
+            result.addSecondaryMessage(I18N.Key.ATTRIBUTE_IS_ALLOWED_ON, attr, altElements);
         }
 
         if (otherAttributes.isEmpty()) {
-            result.secondaryMessage(I18N.Key.ELEMENT_HAS_NO_ATTRIBUTES, el);
+            result.addSecondaryMessage(I18N.Key.ELEMENT_HAS_NO_ATTRIBUTES, el);
         } else {
-            result.primaryMessage(I18N.Key.ATTRIBUTES_ALLOWED_HERE, otherAttributes);
+            result.addPrimaryMessage(I18N.Key.ATTRIBUTES_ALLOWED_HERE, otherAttributes);
 
             final String altSpelling = Util.alternateSpelling(attr, otherAttributes);
             if (altSpelling != null) {
-                result.primaryMessage(I18N.Key.DID_YOU_MEAN, altSpelling);
+                result.addPrimaryMessage(I18N.Key.DID_YOU_MEAN, altSpelling);
             }
         }
 

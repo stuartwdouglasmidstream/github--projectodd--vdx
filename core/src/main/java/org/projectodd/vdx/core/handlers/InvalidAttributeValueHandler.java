@@ -34,7 +34,7 @@ public class InvalidAttributeValueHandler implements ErrorHandler {
         final Position pos = ctx.searchForward(loc.getLineNumber() - 1, loc.getColumnNumber(),
                                                Pattern.compile(attr + "\\s*="));
         final HandledResult result = HandledResult.from(error)
-                .primaryMessage(I18N.Key.ATTRIBUTE_INVALID_VALUE, error.attributeValue(), attr);
+                .addPrimaryMessage(I18N.Key.ATTRIBUTE_INVALID_VALUE, error.attributeValue(), attr);
 
         if (pos != null) {
             result.line(pos.line).column(pos.col);

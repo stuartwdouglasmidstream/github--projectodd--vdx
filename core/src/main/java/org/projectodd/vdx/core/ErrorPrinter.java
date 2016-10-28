@@ -46,10 +46,10 @@ public class ErrorPrinter {
 
             formatResult(out, res);
 
-            out.append(divider())
+            out.append(divider(1))
                     .append('\n');
 
-            this.printer.println(out.toString());
+            this.printer.println(Util.withPrefixAfterNth(2, "|", out.toString()));
         }
     }
 
@@ -111,8 +111,8 @@ public class ErrorPrinter {
 
         if (result.originalMessage() != null) {
             out.append(Util.withPrefix(" ", I18N.lookup(I18N.Key.ORIGINAL_ERROR))).append("\n")
-                    .append(Util.withPrefix(" > ", Util.indentLinesAfterNth(2, LINE_INDENT, Util.wrapString(LINE_WIDTH,
-                            result.originalMessage()))))
+                    .append(Util.withPrefix(" > ", Util.indentLinesAfterNth(2, WRAPPED_LINE_INDENT, Util.wrapString(WRAPPED_LINE_WIDTH,
+                                                                                                                    result.originalMessage()))))
                     .append("\n\n");
         }
     }
@@ -183,8 +183,8 @@ public class ErrorPrinter {
         // contain \n
         final String[] lines = String.join("\n", msg.stream()
                 .map(Object::toString)
-                .map(line -> Util.wrapString(LINE_WIDTH, line))
-                .map(line -> Util.indentLinesAfterFirst(LINE_INDENT, line))
+                .map(line -> Util.wrapString(WRAPPED_LINE_WIDTH, line))
+                .map(line -> Util.indentLinesAfterFirst(WRAPPED_LINE_INDENT, line))
                 .collect(Collectors.toList()))
                 .split("\n");
         final StringBuilder sb = new StringBuilder();
@@ -198,28 +198,30 @@ public class ErrorPrinter {
         return sb.toString();
     }
 
-    private static final String POINTER = "^^^^";
-    private static final char DASH = '=';
-    private static final int LINE_WIDTH = 70;
-    private static final int LINE_INDENT = 2;
+    private String divider(final int shorten) {
+        final StringBuilder ret = new StringBuilder();
+        for(int i = 0; i < DIVIDER_WIDTH - shorten; i++) {
+            ret.append(DASH);
+        }
 
-    private String divider() {
-        return divider(null);
+        return ret.toString();
     }
 
     private String divider(String heading) {
-        final int dashes = heading != null ? 80 - heading.length() - 1 : 80;
         final StringBuilder ret = new StringBuilder();
         if (heading != null) {
             ret.append(heading).append(' ');
         }
-
-        for(int i = 0; i < dashes; i++) {
-            ret.append(DASH);
-        }
+        ret.append(divider(heading != null ? heading.length() + 1 : 0));
 
         return ret.append('\n').toString();
     }
+
+    private static final String POINTER = "^^^^";
+    private static final char DASH = '-';
+    private static final int WRAPPED_LINE_WIDTH = 70;
+    private static final int WRAPPED_LINE_INDENT = 2;
+    private static final int DIVIDER_WIDTH = 80;
 
     private final URL docURL;
     private final ValidationContext context;

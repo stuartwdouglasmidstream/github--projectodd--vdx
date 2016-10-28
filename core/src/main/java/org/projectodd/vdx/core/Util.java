@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -132,14 +133,21 @@ public class Util {
         return null;
     }
 
-    public static String withPrefix(final String prefix, final String v) {
-        final boolean addNewLine = v.endsWith("\n");
 
-        return String.join("\n",
-                           Arrays.stream(v.split("\\n"))
-                                   .map(x -> String.format("%s%s", prefix, x))
-                                   .collect(Collectors.toList()))
-                + (addNewLine ? "\n" : "");
+    public static String withPrefixAfterNth(final int skip, final String prefix, final String v) {
+        final boolean addNewLine = v.endsWith("\n");
+        final List<String> lines = Arrays.asList(v.split("\\n"));
+        final List<String> outLines = new ArrayList<>();
+        outLines.addAll(lines.subList(0, skip));
+        outLines.addAll(lines.subList(skip, lines.size()).stream()
+                                .map(x -> String.format("%s%s", prefix, x))
+                                .collect(Collectors.toList()));
+
+        return String.join("\n", outLines) + (addNewLine ? "\n" : "");
+    }
+
+    public static String withPrefix(final String prefix, final String v) {
+        return withPrefixAfterNth(0, prefix, v);
     }
 
     @SuppressWarnings("unchecked")

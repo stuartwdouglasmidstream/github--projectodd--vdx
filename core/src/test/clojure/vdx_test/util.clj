@@ -45,3 +45,8 @@
   (is (= "ab\n cd" (Util/indentLinesAfterFirst 1 "ab\ncd")))
   (is (= "ab\n cd\n" (Util/indentLinesAfterFirst 1 "ab\ncd\n")))
   (is (= "ab\ncd\n ef" (Util/indentLinesAfterNth 2 1 "ab\ncd\nef"))))
+
+(deftest with-prefix
+  (is (= ":a\n:bcd" (Util/withPrefix ":" "a\nbcd")))
+  (is (= ":a\n:bcd\n" (Util/withPrefix ":" "a\nbcd\n")))
+  (is (= "a\n:bcd" (Util/withPrefixAfterNth 1 ":" "a\nbcd"))))

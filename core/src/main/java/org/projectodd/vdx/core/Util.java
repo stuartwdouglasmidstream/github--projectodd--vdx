@@ -192,7 +192,7 @@ public class Util {
 
     public static String wrapString(final int width, final String str) {
         return String.join("\n",
-                Arrays.stream(str.split("\n"))
+                Arrays.stream(str.split("\\n"))
                         .map(l -> wrapLine(width, l))
                         .collect(Collectors.toList()));
     }
@@ -207,7 +207,8 @@ public class Util {
             prefix.append(' ');
         }
         final StringBuilder out = new StringBuilder();
-        final String[] lines = str.split("\n");
+        final String[] lines = str.split("\\n");
+        final boolean addNewLine = str.endsWith("\n");
         int count = 0;
         for (String line : lines) {
             if (count >= skip) {
@@ -218,6 +219,10 @@ public class Util {
                 out.append('\n');
             }
             count++;
+        }
+
+        if (addNewLine) {
+            out.append('\n');
         }
 
         return out.toString();

@@ -95,7 +95,7 @@
         (assert-message (first (.primaryMessages res))
           I18N$Key/ATTRIBUTE_NOT_ALLOWED
           "biscuit" "ham")
-        (assert-message (first (.secondaryMessages res))
+        (assert-message (second (.primaryMessages res))
           I18N$Key/ELEMENT_HAS_NO_ATTRIBUTES
           "ham")))
 

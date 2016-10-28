@@ -171,7 +171,6 @@ public class ErrorPrinter {
         return sb.toString();
     }
 
-    private static final String POINTER = "^^^^";
     private String alignPointerMessage(final int length, final List<Message> msg) {
         if (msg.isEmpty()) {
 
@@ -182,6 +181,8 @@ public class ErrorPrinter {
         // contain \n
         final String[] lines = String.join("\n", msg.stream()
                 .map(Object::toString)
+                .map(line -> Util.wrapString(LINE_WIDTH, line))
+                .map(line -> Util.indentLinesAfterFirst(LINE_INDENT, line))
                 .collect(Collectors.toList()))
                 .split("\n");
         final StringBuilder sb = new StringBuilder();
@@ -195,7 +196,10 @@ public class ErrorPrinter {
         return sb.toString();
     }
 
+    private static final String POINTER = "^^^^";
     private static final char DASH = '=';
+    private static final int LINE_WIDTH = 70;
+    private static final int LINE_INDENT = 2;
 
     private String divider() {
         return divider(null);

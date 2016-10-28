@@ -34,3 +34,12 @@
   (is (Util/providesXMLNS #{"urn:jboss:domain:4.2"} (io/resource "wildfly-config_4_2.xsd")))
   (is (not (Util/providesXMLNS #{"urn:jboss:domain:datasources:4.0"} (io/resource "wildfly-config_4_2.xsd")))))
 
+(deftest line-wrapping-should-work
+  (is (= "a b c\nd e f\ng" (Util/wrapString 5 "a b c d e f g")))
+  (is (= "abcdefg" (Util/wrapString 5 "abcdefg")))
+  (is (= "abcde" (Util/wrapString 5 "abcde")))
+  (is (= "a" (Util/wrapString 5 "a"))))
+
+(deftest indenting-should-work
+  (is (= "ab" (Util/indentLinesAfterFirst 3 "ab")))
+  (is (= "ab\n cd" (Util/indentLinesAfterFirst 1 "ab\ncd"))))

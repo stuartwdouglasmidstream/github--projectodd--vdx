@@ -173,5 +173,38 @@ public class Util {
         };
     }
 
+    private static String wrapLine(final int width, final String line) {
+        if (line.length() <= width) {
+
+            return line;
+        }
+
+        for (int idx = width; idx > 0; idx--) {
+            if (line.charAt(idx) == ' ') {
+
+                return line.substring(0, idx) + "\n" + wrapLine(width, line.substring(idx + 1));
+            }
+        }
+
+        // no spaces found in line - don't break
+        return line;
+    }
+
+    public static String wrapString(final int width, final String str) {
+        return String.join("\n",
+                Arrays.stream(str.split("\n"))
+                        .map(l -> wrapLine(width, l))
+                        .collect(Collectors.toList()));
+    }
+
+    public static String indentLinesAfterFirst(final int indent, final String str) {
+        final StringBuilder prefix = new StringBuilder();
+        for (int i = 0; i < indent; i++) {
+            prefix.append(' ');
+        }
+
+        return String.join("\n" + prefix.toString(), str.split("\n"));
+    }
+
 
 }

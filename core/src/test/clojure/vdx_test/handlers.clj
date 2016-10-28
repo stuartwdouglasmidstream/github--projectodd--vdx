@@ -133,7 +133,7 @@
                     (.element (QName. "urn:vdx:test" "bar"))
                     (.attribute (QName. "attr2"))))]
         (is (= 18 (.column res)))
-        (assert-message (nth (.primaryMessages res) 2)
+        (assert-message (second (.primaryMessages res))
           I18N$Key/DID_YOU_MEAN
           "attr1")))
 
@@ -147,7 +147,7 @@
                     (.attribute (QName. "attr2"))
                     (.alternatives #{"attrx"})))]
         (is (= 18 (.column res)))
-        (assert-message (nth (.primaryMessages res) 2)
+        (assert-message (second (.primaryMessages res))
           I18N$Key/DID_YOU_MEAN "attrx")))
 
     (testing "matchable attribute"

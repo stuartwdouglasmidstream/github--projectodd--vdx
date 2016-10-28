@@ -65,12 +65,12 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
         if (otherAttributes.isEmpty()) {
             result.addSecondaryMessage(I18N.Key.ELEMENT_HAS_NO_ATTRIBUTES, el);
         } else {
-            result.addPrimaryMessage(I18N.Key.ATTRIBUTES_ALLOWED_HERE, otherAttributes);
-
             final String altSpelling = Util.alternateSpelling(attr, otherAttributes);
             if (altSpelling != null) {
                 result.addPrimaryMessage(I18N.Key.DID_YOU_MEAN, altSpelling);
             }
+
+            result.addPrimaryMessage(I18N.Key.ATTRIBUTES_ALLOWED_HERE, otherAttributes);
         }
 
         return result;

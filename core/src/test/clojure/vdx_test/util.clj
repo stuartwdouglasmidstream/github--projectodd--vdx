@@ -36,6 +36,7 @@
 
 (deftest line-wrapping-should-work
   (is (= "a b c\nd e f\ng" (Util/wrapString 5 "a b c d e f g")))
+  (is (= "a b c\nd e f\ng\n" (Util/wrapString 5 "a b c d e f g\n")))
   (is (= "abcdefg" (Util/wrapString 5 "abcdefg")))
   (is (= "abcde" (Util/wrapString 5 "abcde")))
   (is (= "a" (Util/wrapString 5 "a"))))

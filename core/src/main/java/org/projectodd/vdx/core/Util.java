@@ -135,7 +135,6 @@ public class Util {
 
 
     public static String withPrefixAfterNth(final int skip, final String prefix, final String v) {
-        final boolean addNewLine = v.endsWith("\n");
         final List<String> lines = Arrays.asList(v.split("\\n"));
         final List<String> outLines = new ArrayList<>();
         outLines.addAll(lines.subList(0, skip));
@@ -143,7 +142,7 @@ public class Util {
                                 .map(x -> String.format("%s%s", prefix, x))
                                 .collect(Collectors.toList()));
 
-        return String.join("\n", outLines) + (addNewLine ? "\n" : "");
+        return preserveFinalNewline(v, String.join("\n", outLines));
     }
 
     public static String withPrefix(final String prefix, final String v) {
@@ -199,10 +198,20 @@ public class Util {
     }
 
     public static String wrapString(final int width, final String str) {
-        return String.join("\n",
-                Arrays.stream(str.split("\\n"))
-                        .map(l -> wrapLine(width, l))
-                        .collect(Collectors.toList()));
+        return preserveFinalNewline(str,
+                                    String.join("\n",
+                                                Arrays.stream(str.split("\\n"))
+                                                        .map(l -> wrapLine(width, l))
+                                                        .collect(Collectors.toList())));
+    }
+
+    public static String wrapAndIndentEachLine(final int width, final int indent, final String str) {
+        return preserveFinalNewline(str,
+                                    String.join("\n",
+                                                Arrays.stream(str.split("\\n"))
+                                                        .map(l -> wrapLine(width, l))
+                                                        .map(l -> indentLinesAfterFirst(indent, l))
+                                                        .collect(Collectors.toList())));
     }
 
     public static String indentLinesAfterFirst(final int indent, final String str) {
@@ -216,7 +225,6 @@ public class Util {
         }
         final StringBuilder out = new StringBuilder();
         final String[] lines = str.split("\\n");
-        final boolean addNewLine = str.endsWith("\n");
         int count = 0;
         for (String line : lines) {
             if (count >= skip) {
@@ -229,12 +237,10 @@ public class Util {
             count++;
         }
 
-        if (addNewLine) {
-            out.append('\n');
-        }
-
-        return out.toString();
+        return preserveFinalNewline(str, out.toString());
     }
 
-
+    private static String preserveFinalNewline(final String orig, final String out) {
+        return out + (orig.endsWith("\n") ? "\n" : "");
+    }
 }

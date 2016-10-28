@@ -43,9 +43,10 @@
     (instance? List v) (map coerce-value v)
     :default v))
 
-(defn assert-message [msg template & values]
-  (is (= template (.template msg)))
-  (is (= (or values []) (map coerce-value (.rawValues msg)))))
+(defmacro assert-message [msg template & values]
+  `(do
+     (is (= ~template (.template ~msg)))
+     (is (= (or [~@values] []) (map coerce-value (.rawValues ~msg))))))
 
 (deftest test-DuplicateElementHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")

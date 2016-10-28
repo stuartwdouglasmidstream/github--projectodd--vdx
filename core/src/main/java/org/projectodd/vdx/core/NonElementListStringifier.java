@@ -51,7 +51,8 @@ public class NonElementListStringifier implements Stringifier {
                 .collect(Collectors.toList());
 
         final StringBuilder sb = new StringBuilder();
-        if (values.size() <= this.bulletListThreshold) {
+        if (this.bulletListThreshold == -1 ||
+                values.size() <= this.bulletListThreshold) {
             sb.append(Util.asCommaString(values)).append(' ');
         } else {
             sb.append('\n');

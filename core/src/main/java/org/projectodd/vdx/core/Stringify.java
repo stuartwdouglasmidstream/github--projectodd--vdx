@@ -41,8 +41,8 @@ public class Stringify {
             registerStringifier(new ElementStringifier());
             registerStringifier(new ElementListStringifier());
             registerStringifier(new ListListStringifier(10));
-            // set the break threshold higher than the limit to always treat as a comma separated list
-            registerStringifier(new NonElementListStringifier(51, 50));
+            // always treat as a comma-separated list and always show all results
+            registerStringifier(new NonElementListStringifier(-1, Integer.MAX_VALUE));
             defaultsRegistered = true;
         }
     }

@@ -60,7 +60,7 @@ public class NonElementListStringifier implements Stringifier {
         }
 
         if (this.limit < list.size()) {
-            sb.append(I18N.format(I18N.Key.AND_N_MORE, list.size() - limit)).append('\n');
+            sb.append(I18N.format(I18N.Key.AND_N_MORE, list.size() - limit));
         }
 
         return sb.toString();

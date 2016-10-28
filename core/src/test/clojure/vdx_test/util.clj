@@ -42,4 +42,5 @@
 
 (deftest indenting-should-work
   (is (= "ab" (Util/indentLinesAfterFirst 3 "ab")))
-  (is (= "ab\n cd" (Util/indentLinesAfterFirst 1 "ab\ncd"))))
+  (is (= "ab\n cd" (Util/indentLinesAfterFirst 1 "ab\ncd")))
+  (is (= "ab\ncd\n ef" (Util/indentLinesAfterNth 2 1 "ab\ncd\nef"))))

@@ -198,12 +198,29 @@ public class Util {
     }
 
     public static String indentLinesAfterFirst(final int indent, final String str) {
+        return indentLinesAfterNth(1, indent, str);
+    }
+
+    public static String indentLinesAfterNth(final int skip, final int indent, final String str) {
         final StringBuilder prefix = new StringBuilder();
         for (int i = 0; i < indent; i++) {
             prefix.append(' ');
         }
+        final StringBuilder out = new StringBuilder();
+        final String[] lines = str.split("\n");
+        int count = 0;
+        for (String line : lines) {
+            if (count >= skip) {
+                out.append(prefix);
+            }
+            out.append(line);
+            if (count < lines.length - 1) {
+                out.append('\n');
+            }
+            count++;
+        }
 
-        return String.join("\n" + prefix.toString(), str.split("\n"));
+        return out.toString();
     }
 
 

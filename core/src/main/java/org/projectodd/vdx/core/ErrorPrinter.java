@@ -111,7 +111,9 @@ public class ErrorPrinter {
 
         if (result.originalMessage() != null) {
             out.append(Util.withPrefix(" ", I18N.lookup(I18N.Key.ORIGINAL_ERROR))).append("\n")
-                    .append(Util.withPrefix(" > ", result.originalMessage())).append("\n\n");
+                    .append(Util.withPrefix(" > ", Util.indentLinesAfterNth(2, LINE_INDENT, Util.wrapString(LINE_WIDTH,
+                            result.originalMessage()))))
+                    .append("\n\n");
         }
     }
 

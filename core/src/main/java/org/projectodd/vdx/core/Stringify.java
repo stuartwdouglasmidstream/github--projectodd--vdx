@@ -40,7 +40,7 @@ public class Stringify {
         if (!defaultsRegistered) {
             registerStringifier(new ElementStringifier());
             registerStringifier(new ElementListStringifier());
-            registerStringifier(new ListListStringifier(10));
+            registerStringifier(new ListListStringifier(20));
             // always treat as a comma-separated list and always show all results
             registerStringifier(new NonElementListStringifier(-1, Integer.MAX_VALUE));
             defaultsRegistered = true;

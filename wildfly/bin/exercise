@@ -7,29 +7,40 @@ if [ ! -d $wf_dir ]; then
     exit 1
 fi
 
-function run_for_type {
+base_dir="$(dirname $0)/.."
+
+function run_config {
     config_type=$1
-        
+    f=$2
+    
     config_dir="${wf_dir}/${config_type}/configuration"
-    base_dir="$(dirname $0)/.."
-    src_dir="${base_dir}/src/test/resources/examples/${config_type}"
+    path=$(realpath $f)
+    config_name=$(basename $path)
+    config_file="${config_dir}/${config_name}"
 
-    for f in ${src_dir}/*.xml; do
-        path=$(realpath $f)
-        config_name=$(basename $path)
-        config_file="${config_dir}/${config_name}"
+    echo
+    echo
+    echo "############### EXERCISING ${config_name} ($config_type)"
+    echo
+    echo
+    ln -s $path $config_file
+    ${wf_dir}/bin/${config_type}.sh -c $config_name
+    rm $config_file
+}
 
-        echo
-        echo
-        echo "############### EXERCISING ${config_name} ($config_type)"
-        echo
-        echo
-        ln -s $path $config_file
-        ${wf_dir}/bin/${config_type}.sh -c $config_name
-        rm $config_file
+function run_all_for_type {
+    config_type=$1
+
+    for f in ${base_dir}/src/test/resources/examples/${config_type}/*.xml; do
+        run_config $config_type $f
     done
 }
 
-run_for_type "standalone"
-run_for_type "domain"
+if [ $# -eq 1 ]; then
+    run_all_for_type "standalone"
+    run_all_for_type "domain"
+else
+    run_config "standalone" "${base_dir}/src/test/resources/examples/standalone/$2"
+fi
+
 

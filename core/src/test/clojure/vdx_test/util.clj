@@ -51,3 +51,7 @@
   (is (= ":a\n:bcd" (Util/withPrefix ":" "a\nbcd")))
   (is (= ":a\n:bcd\n" (Util/withPrefix ":" "a\nbcd\n")))
   (is (= "a\n:bcd" (Util/withPrefixAfterNth 1 ":" "a\nbcd"))))
+
+(deftest as-columns
+  (is (= "ab   efe  ij   \ncd   gh   \n" (Util/asColumns ["ab" "cd" "efe" "gh" "ij"])))
+  (is (= "ababababababababababababab  efe                         \ncd                          \n" (Util/asColumns ["ababababababababababababab" "cd" "efe"]))))

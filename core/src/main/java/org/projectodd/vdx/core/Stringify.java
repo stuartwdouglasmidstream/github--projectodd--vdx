@@ -41,8 +41,7 @@ public class Stringify {
             registerStringifier(new ElementStringifier());
             registerStringifier(new ElementListStringifier());
             registerStringifier(new ListListStringifier(20));
-            // always treat as a comma-separated list and always show all results
-            registerStringifier(new NonElementListStringifier(-1, Integer.MAX_VALUE));
+            registerStringifier(new NonElementListStringifier(5, Integer.MAX_VALUE));
             defaultsRegistered = true;
         }
     }

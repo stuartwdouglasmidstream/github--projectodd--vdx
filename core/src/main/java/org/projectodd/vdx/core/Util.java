@@ -243,4 +243,29 @@ public class Util {
     private static String preserveFinalNewline(final String orig, final String out) {
         return out + (orig.endsWith("\n") ? "\n" : "");
     }
+
+    public static String asColumns(final List<String> values) {
+        final int widest = values.stream()
+                .mapToInt(String::length)
+                .max()
+                .orElse(0); // won't happen
+        final int columns = widest > 20 ? 2 : 3;
+        final int rows = values.size() / columns + (values.size() % columns > 0 ? 1 : 0);
+
+        final String format = "%-" + widest + "s  ";
+
+        final StringBuilder out = new StringBuilder();
+        for (int i = 0; i < rows; i++) {
+            for (int col = 0; col < columns; col++) {
+                final int offset = (col * rows) + i;
+                if (offset < values.size()) {
+                    out.append(String.format(format, values.get(offset)));
+                }
+            }
+            out.append('\n');
+        }
+
+        return out.toString();
+    }
+
 }

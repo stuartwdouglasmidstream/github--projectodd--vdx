@@ -23,9 +23,14 @@ import org.projectodd.vdx.core.schema.SchemaElement;
 
 public class NonElementListStringifier implements Stringifier {
 
-    public NonElementListStringifier(final int threshold, final int limit) {
-        this.bulletListThreshold = threshold;
+    public NonElementListStringifier(final int listThreshold, final int limit) {
+        this(listThreshold, limit, false);
+    }
+
+    NonElementListStringifier(final int threshold, final int limit, final boolean asBulletList) {
+        this.listThreshold = threshold;
         this.limit = limit;
+        this.asBulletList = asBulletList;
     }
 
     @Override
@@ -51,12 +56,16 @@ public class NonElementListStringifier implements Stringifier {
                 .collect(Collectors.toList());
 
         final StringBuilder sb = new StringBuilder();
-        if (this.bulletListThreshold == -1 ||
-                values.size() <= this.bulletListThreshold) {
+        if (this.listThreshold == -1 ||
+                values.size() <= this.listThreshold) {
             sb.append(Util.asCommaString(values)).append(' ');
         } else {
             sb.append('\n');
-            values.forEach(v -> sb.append("- ").append(v).append('\n'));
+            if (this.asBulletList) {
+                values.forEach(v -> sb.append("- ").append(v).append('\n'));
+            } else {
+                sb.append(Util.asColumns(values));
+            }
         }
 
         if (this.limit < list.size()) {
@@ -66,6 +75,9 @@ public class NonElementListStringifier implements Stringifier {
         return sb.toString();
     }
 
-    private final int bulletListThreshold;
+
+    private final int listThreshold;
     private final int limit;
+    private final boolean asBulletList;
 }
+

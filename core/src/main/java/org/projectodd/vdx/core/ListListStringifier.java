@@ -27,6 +27,6 @@ public class ListListStringifier extends NonElementListStringifier {
     }
 
     public ListListStringifier(final int limit) {
-        super(0, limit);
+        super(0, limit, true);
     }
 }

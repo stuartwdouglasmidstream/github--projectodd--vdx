@@ -183,6 +183,7 @@ public class ErrorPrinter {
         // contain \n
         final String[] lines = String.join("\n", msg.stream()
                 .map(Object::toString)
+                .map(s -> s + "\n")
                 .map(line -> Util.wrapString(WRAPPED_LINE_WIDTH, line))
                 .map(line -> Util.indentLinesAfterFirst(WRAPPED_LINE_INDENT, line))
                 .collect(Collectors.toList()))
@@ -190,6 +191,7 @@ public class ErrorPrinter {
         final StringBuilder sb = new StringBuilder();
         sb.append(String.format("%" + (length + lines[0].length() + POINTER.length() + 1) + "s", POINTER + " " + lines[0]))
                 .append('\n');
+
         for (int i = 1; i < lines.length; i++) {
             sb.append(String.format("%" + (length + lines[i].length() + POINTER.length() + 1) + "s", lines[i]))
                     .append('\n');

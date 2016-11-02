@@ -101,6 +101,8 @@ public class ErrorReporter {
                         .pathGate(rel)
                         .prefixProvider(rel)
                         .print(error);
+            } else {
+                this.logger.info(I18N.noSchemasAvailable(this.schemaRoot));
             }
         } catch (Exception ex) {
             printed = false;

@@ -16,6 +16,7 @@
 
 package org.projectodd.vdx.core;
 
+import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -51,6 +52,7 @@ public class I18N {
         ELEMENTS_REQUIRED_MISSING,
         ELEMENTS_REQUIRED_MISSING_LIST,
 
+        NO_SCHEMAS_AVAILABLE,
         ORIGINAL_ERROR,
         PASSTHRU,
         PRINT_FAILURE,
@@ -82,6 +84,10 @@ public class I18N {
 
     public static String failedToPrintError(final Throwable ex) {
         return format(Key.PRINT_FAILURE, "OPVDX002", ex.getMessage());
+    }
+
+    public static String noSchemasAvailable(final File path) {
+        return format(Key.NO_SCHEMAS_AVAILABLE, "OPVDX003", path.getAbsolutePath());
     }
 
     private static Locale activeLocale() {

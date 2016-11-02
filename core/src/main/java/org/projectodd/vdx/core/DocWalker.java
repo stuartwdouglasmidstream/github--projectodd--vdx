@@ -32,6 +32,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -42,83 +43,105 @@ public class DocWalker {
     }
 
     public Tree<DocElement> walk() {
-        final Tree<DocElement> tree = new Tree<>();
-        final Deque<Tree <DocElement>> stack = new ArrayDeque<>();
-        stack.push(tree);
+        if (this.tree == null) {
+            this.tree = new Tree<>();
+            final Deque<Tree<DocElement>> stack = new ArrayDeque<>();
+            stack.push(tree);
 
-        final ContentHandler handler = new DefaultHandler() {
-            @Override
-            public void setDocumentLocator(Locator locator) {
-                this.locator = locator;
-            }
-
-            @Override
-            public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-                final String namespace = attributes.getValue("xmlns");
-                if (namespace != null) {
-                    nsStack.push(namespace);
-                } else {
-                    nsStack.push(nsStack.peek());
-                }
-                stack.push(stack.peek().addChild(new DocElement(qname(qName), attributes)
-                                                         .startPosition(lastPosition)));
-            }
-
-            @Override
-            public void endElement(String uri, String localName, String qName) throws SAXException {
-                final Position pos = position();
-                stack.peek().value().endPosition(pos);
-                storePosition(pos);
-                stack.pop();
-                nsStack.pop();
-            }
-
-            @Override
-            public void characters(char[] ch, int start, int length) throws SAXException {
-                storePosition(position());
-            }
-
-            @Override
-            public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
-                storePosition(position());
-            }
-
-            private void storePosition(final Position current) {
-                if (current.line > lastPosition.line ||
-                        (current.line == lastPosition.line &&
-                        current.col > lastPosition.col)) {
-                    this.lastPosition = current;
+            final ContentHandler handler = new DefaultHandler() {
+                @Override
+                public void setDocumentLocator(Locator locator) {
+                    this.locator = locator;
                 }
 
-            }
-
-            private QName qname(final String local) {
-                if (nsStack.peek() != null) {
-                    return new QName(nsStack.peek(), local);
-                } else {
-                    return QName.valueOf(local);
+                @Override
+                public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+                    final String namespace = attributes.getValue("xmlns");
+                    if (namespace != null) {
+                        nsStack.push(namespace);
+                    } else {
+                        nsStack.push(nsStack.peek());
+                    }
+                    stack.push(stack.peek().addChild(new DocElement(qname(qName), attributes)
+                                                             .startPosition(lastPosition)));
                 }
+
+                @Override
+                public void endElement(String uri, String localName, String qName) throws SAXException {
+                    final Position pos = position();
+                    stack.peek().value().endPosition(pos);
+                    storePosition(pos);
+                    stack.pop();
+                    nsStack.pop();
+                }
+
+                @Override
+                public void characters(char[] ch, int start, int length) throws SAXException {
+                    storePosition(position());
+                }
+
+                @Override
+                public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
+                    storePosition(position());
+                }
+
+                private void storePosition(final Position current) {
+                    if (current.line > lastPosition.line ||
+                            (current.line == lastPosition.line &&
+                                    current.col > lastPosition.col)) {
+                        this.lastPosition = current;
+                    }
+
+                }
+
+                private QName qname(final String local) {
+                    if (nsStack.peek() != null) {
+                        return new QName(nsStack.peek(), local);
+                    } else {
+                        return QName.valueOf(local);
+                    }
+                }
+
+                private Position position() {
+                    return new Position(locator.getLineNumber(), locator.getColumnNumber());
+                }
+
+                private Locator locator = null;
+
+                private Position lastPosition = new Position(1, 2);
+
+                private Deque<String> nsStack = new ArrayDeque<>();
+            };
+
+            try (final InputStream in = this.document.openStream()) {
+                final SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+
+                final XMLReader reader = parser.getXMLReader();
+                reader.setContentHandler(handler);
+                reader.parse(new InputSource(in));
+            } catch (SAXParseException e) {
+                this.validationFailure = e;
+            } catch (IOException | ParserConfigurationException | SAXException ignored) {
             }
+        }
 
-            private Position position() {
-                return new Position(locator.getLineNumber(), locator.getColumnNumber());
-            }
+        return this.tree;
+    }
 
-            private Locator locator = null;
-            private Position lastPosition = new Position(1, 2);
-            private Deque<String> nsStack = new ArrayDeque<>();
-        };
+    public boolean valid() {
+        walk();
 
-        try (final InputStream in = this.document.openStream()) {
-            final SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+        return this.validationFailure == null;
+    }
 
-            final XMLReader reader = parser.getXMLReader();
-            reader.setContentHandler(handler);
-            reader.parse(new InputSource(in));
-        } catch (IOException | ParserConfigurationException | SAXException ignored) {}
+    public SAXParseException validationFailure() {
+        walk();
 
-        return tree;
+        return this.validationFailure;
     }
 
     private final URL document;
+    private Tree<DocElement> tree = null;
+    private SAXParseException validationFailure = null;
+
 }

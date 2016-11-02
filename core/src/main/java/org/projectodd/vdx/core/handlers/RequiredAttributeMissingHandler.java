@@ -16,6 +16,7 @@
 
 package org.projectodd.vdx.core.handlers;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,7 @@ import org.projectodd.vdx.core.I18N;
 import org.projectodd.vdx.core.Util;
 import org.projectodd.vdx.core.ValidationContext;
 import org.projectodd.vdx.core.ValidationError;
+import org.projectodd.vdx.core.schema.SchemaElement;
 
 public class RequiredAttributeMissingHandler implements ErrorHandler {
     @Override
@@ -35,8 +37,12 @@ public class RequiredAttributeMissingHandler implements ErrorHandler {
                 .addPrimaryMessage(I18N.Key.ATTRIBUTE_REQUIRED_MISSING, el);
 
         if (!alts.isEmpty()) {
-            final Set<String> attributesForElement =
-                    ctx.attributesForElement(ctx.mapDocLocationToSchemaPath(error.element(), error.position()));
+            final List<SchemaElement> path = ctx.mapDocLocationToSchemaPath(error.element(), error.position());
+            if (path.isEmpty()) {
+                result.possiblyMalformed(true);
+            }
+
+            final Set<String> attributesForElement = ctx.attributesForElement(path);
 
             result.addPrimaryMessage(I18N.Key.ATTRIBUTE_REQUIRED_MISSING_LIST,
                                   Util.asSortedList(alts).stream()

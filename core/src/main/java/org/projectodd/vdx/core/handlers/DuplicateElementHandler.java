@@ -33,24 +33,22 @@ public class DuplicateElementHandler implements ErrorHandler {
 
         final HandledResult result = HandledResult.from(error);
 
+        final List<DocElement> docPath = ctx.pathToDocElement(error.element(), error.position());
         if (attr != null) {
             result.addPrimaryMessage(I18N.Key.ELEMENT_WITH_ATTRIBUTE_DUPLICATED, el, attr, attrValue);
         } else {
-            final List<DocElement> path = ctx.pathToDocElement(error.element(), error.position());
             String parentName = "parent";
 
-            if (!path.isEmpty() && path.size() > 1) {
-                parentName = path.get(path.size() - 2).name();
+            if (!docPath.isEmpty() && docPath.size() > 1) {
+                parentName = docPath.get(docPath.size() - 2).name();
             }
 
             result.addPrimaryMessage(I18N.Key.ELEMENT_DUPLICATED, el, parentName);
         }
 
-        final List<DocElement> path = ctx.pathToDocElement(error.element(), error.position());
-
-        if (!path.isEmpty()) {
+        if (!docPath.isEmpty()) {
             final List<List<DocElement>> docElements =
-                    ctx.docElementSiblings(path, e -> e.qname().equals(error.element()) &&
+                    ctx.docElementSiblings(docPath, e -> e.qname().equals(error.element()) &&
                             (attr == null || attrValue.equals(e.attributes().get(attr))));
 
             if (!docElements.isEmpty()) {
@@ -65,6 +63,8 @@ public class DuplicateElementHandler implements ErrorHandler {
                     result.addSecondaryResult(new HandledResult(otherEl.startPosition().line, otherEl.startPosition().col, null));
                 }
             }
+        } else {
+            result.possiblyMalformed(true);
         }
 
         return result;

@@ -38,10 +38,12 @@ import org.projectodd.vdx.core.schema.SchemaElement;
 import org.projectodd.vdx.core.schema.SchemaPathGate;
 import org.projectodd.vdx.core.schema.SchemaPathPrefixProvider;
 import org.projectodd.vdx.core.schema.SchemaWalker;
+import org.xml.sax.SAXParseException;
 
 public class ValidationContext {
     public ValidationContext(final URL document, final List<URL> schemas) throws IOException {
         this.document = document;
+        this.docWalker = new DocWalker(document);
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(document.openStream()))) {
             this.lines = reader.lines().collect(Collectors.toList());
         }
@@ -84,7 +86,20 @@ public class ValidationContext {
     }
 
     public ErrorHandler.HandledResult handle(ValidationError error) {
-        return error.type().handler().handle(this, error);
+        final ErrorHandler.HandledResult result = error.type().handler().handle(this, error);
+
+        if (result.isPossiblyMalformed() &&
+                !this.docWalker.valid()) {
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+            final SAXParseException ex = this.docWalker.validationFailure();
+            final ErrorHandler.HandledResult validationResult =
+                    new ErrorHandler.HandledResult(ex.getLineNumber(), ex.getColumnNumber(), null);
+            validationResult.addPrimaryMessage(I18N.Key.PASSTHRU, Util.stripPeriod(ex.getLocalizedMessage()));
+            result.addSecondaryMessage(I18N.Key.MALFORMED_XML, Util.documentName(this.document));
+            result.addSecondaryResult(validationResult);
+        }
+
+        return result;
     }
 
     public List<List<SchemaElement>> alternateElementsForAttribute(final String attribute) {
@@ -309,11 +324,7 @@ public class ValidationContext {
     }
 
     private Tree<DocElement> documentTree() {
-        if (this.walkedDoc == null) {
-            this.walkedDoc = new DocWalker(this.document).walk();
-        }
-
-        return this.walkedDoc;
+        return this.docWalker.walk();
     }
 
     private Tree<SchemaElement> schemaTree() {
@@ -327,8 +338,8 @@ public class ValidationContext {
     private final URL document;
     private final List<String> lines;
     private final List<URL> schemas = new ArrayList<>();
+    private final DocWalker docWalker;
     private Tree<SchemaElement> walkedSchemas = null;
-    private Tree<DocElement> walkedDoc = null;
     private SchemaPathPrefixProvider prefixProvider = null;
     private SchemaPathGate pathGate = SchemaPathGate.DEFAULT;
 }

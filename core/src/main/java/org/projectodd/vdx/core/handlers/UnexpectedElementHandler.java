@@ -70,6 +70,8 @@ public class UnexpectedElementHandler implements ErrorHandler {
                                                       .map(SchemaElement::name)
                                                       .collect(Collectors.toList()));
                 }
+            } else {
+                response.possiblyMalformed(true);
             }
         } else {
             otherElements = Util.asSortedList(error.alternatives());

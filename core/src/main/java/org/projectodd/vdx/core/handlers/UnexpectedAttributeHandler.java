@@ -52,6 +52,9 @@ public class UnexpectedAttributeHandler implements ErrorHandler {
 
         if (error.alternatives().isEmpty()) {
             final List<SchemaElement> schemaPath = ctx.mapDocLocationToSchemaPath(error.element(), error.position());
+            if (schemaPath.isEmpty()) {
+                result.possiblyMalformed(true);
+            }
 
             otherAttributes = Util.asSortedList(ctx.attributesForElement(schemaPath));
         } else {

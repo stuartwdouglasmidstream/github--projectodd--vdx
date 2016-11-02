@@ -16,6 +16,7 @@
 
 package org.projectodd.vdx.core.handlers;
 
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -56,8 +57,13 @@ public class RequiredElementMissingHandler implements ErrorHandler {
         }
 
         if (!alts.isEmpty()) {
+            final List<SchemaElement> path = ctx.mapDocLocationToSchemaPath(error.element(), error.position());
+            if (path.isEmpty()) {
+                result.possiblyMalformed(true);
+            }
+
             Set<String> otherElements =
-                    ctx.elementsForElement(ctx.mapDocLocationToSchemaPath(error.element(), error.position())).stream()
+                    ctx.elementsForElement(path).stream()
                     .map(SchemaElement::name)
                     .collect(Collectors.toSet());
 

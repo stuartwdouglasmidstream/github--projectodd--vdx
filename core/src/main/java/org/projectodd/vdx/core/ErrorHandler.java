@@ -106,6 +106,15 @@ public interface ErrorHandler {
             return originalMessage;
         }
 
+        public boolean isPossiblyMalformed() {
+            return possiblyMalformed;
+        }
+
+        public HandledResult possiblyMalformed(boolean possiblyMalformed) {
+            this.possiblyMalformed = possiblyMalformed;
+
+            return this;
+        }
 
         public String toString() {
             return "[line=" + line + ", column=" + column + ", originalMessage='" +
@@ -115,6 +124,8 @@ public interface ErrorHandler {
 
         private int line;
         private int column;
+
+        private boolean possiblyMalformed = false;
         private final String originalMessage;
         private List<Message> primaryMessages = new ArrayList<>();
         private List<Message> secondaryMessages = new ArrayList<>();

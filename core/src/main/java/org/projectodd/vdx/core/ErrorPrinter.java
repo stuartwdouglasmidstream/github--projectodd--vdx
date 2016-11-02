@@ -38,11 +38,9 @@ public class ErrorPrinter {
         final ErrorHandler.HandledResult res = this.context.handle(error);
 
         if (res != null) {
-            final String[] docPathParts = docURL.getPath().split("/");
-
             final StringBuilder out = new StringBuilder()
                     .append('\n')
-                    .append(divider(I18N.validationErrorIn(docPathParts[docPathParts.length - 1])));
+                    .append(divider(I18N.validationErrorIn(Util.documentName(this.docURL))));
 
             formatResult(out, res);
 

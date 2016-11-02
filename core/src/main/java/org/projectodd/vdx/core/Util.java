@@ -268,4 +268,18 @@ public class Util {
         return out.toString();
     }
 
+    public static String documentName(final URL path) {
+        final String[] docPathParts = path.getPath().split("/");
+
+        return docPathParts[docPathParts.length - 1];
+    }
+
+    public static String stripPeriod(final String in) {
+        if (in.endsWith(".")) {
+
+            return in.substring(0, in.length() - 1);
+        }
+
+        return in;
+    }
 }

@@ -16,16 +16,27 @@
 
 package org.projectodd.vdx.core.handlers;
 
+import java.util.regex.Pattern;
+
 import org.projectodd.vdx.core.ErrorHandler;
 import org.projectodd.vdx.core.I18N;
+import org.projectodd.vdx.core.Util;
 import org.projectodd.vdx.core.ValidationContext;
 import org.projectodd.vdx.core.ValidationError;
 
 public class UnknownErrorHandler implements ErrorHandler {
     @Override
     public HandledResult handle(ValidationContext ctx, ValidationError err) {
+        String msg = err.fallbackMessage();
+        if (msg == null) {
+            msg = err.message();
+            if (Pattern.matches(".*\\n at.*", msg)) {
+                final String[] parts = msg.split("\\n");
+                msg = parts[0];
+            }
+        }
+
         return HandledResult.from(err)
-                .addPrimaryMessage(I18N.Key.PASSTHRU,
-                                err.fallbackMessage() != null ? err.fallbackMessage() : err.message());
+                .addPrimaryMessage(I18N.Key.PASSTHRU, Util.stripPeriod(msg));
     }
 }

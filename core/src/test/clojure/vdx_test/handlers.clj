@@ -250,14 +250,24 @@
 (deftest test-UnknownErrorHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
               [(io/resource "schemas/handler-test.xsd")])]
-    (let [res (.handle (UnknownErrorHandler.)
-                ctx
-                (-> (ValidationError. ErrorType/UNKNOWN_ERROR
-                      "foo"
-                      (location 1 1))
-                  (.fallbackMessage "bar")))]
-      (assert-message (first (.primaryMessages res))
-        I18N$Key/PASSTHRU "bar"))))
+    (testing "with fallback"
+      (let [res (.handle (UnknownErrorHandler.)
+                  ctx
+                  (-> (ValidationError. ErrorType/UNKNOWN_ERROR
+                        "foo"
+                        (location 1 1))
+                    (.fallbackMessage "bar")))]
+        (assert-message (first (.primaryMessages res))
+          I18N$Key/PASSTHRU "bar")))
+    
+    (testing "with parse error"
+      (let [res (.handle (UnknownErrorHandler.)
+                  ctx
+                  (ValidationError. ErrorType/UNKNOWN_ERROR
+                    "Unexpected close tag </aauthentication>; expected </authentication>.\n at [row,col {unknown-source}]: [38,33]"
+                    (location 1 1)))]
+        (assert-message (first (.primaryMessages res))
+          I18N$Key/PASSTHRU "Unexpected close tag </aauthentication>; expected </authentication>")))))
 
 (deftest test-UnsupportedElementHandler
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")

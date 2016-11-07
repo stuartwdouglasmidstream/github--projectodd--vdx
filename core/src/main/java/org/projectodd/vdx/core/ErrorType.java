@@ -16,6 +16,11 @@
 
 package org.projectodd.vdx.core;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Optional;
+
 import org.projectodd.vdx.core.handlers.DuplicateAttributeHandler;
 import org.projectodd.vdx.core.handlers.DuplicateElementHandler;
 import org.projectodd.vdx.core.handlers.InvalidAttributeValueHandler;
@@ -43,8 +48,18 @@ public enum ErrorType {
 
     public ErrorHandler handler() {
         try {
-            return this.handlerClass.newInstance();
-        } catch (IllegalAccessException | InstantiationException e) {
+            Optional<Constructor<?>> ctor = Arrays.stream(this.handlerClass.getConstructors())
+                    .filter(c -> c.getGenericParameterTypes().length == 0)
+                    .findFirst();
+
+            if (!ctor.isPresent()) {
+
+                throw new RuntimeException("Class " + this.handlerClass.getCanonicalName() + " has no 0-arity constructor");
+            }
+
+            return (ErrorHandler)ctor.get().newInstance();
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
+
             throw new RuntimeException(e);
         }
     }

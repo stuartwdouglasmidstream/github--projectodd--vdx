@@ -15,18 +15,7 @@
 (ns vdx-test.handlers
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io])
-  (:import (org.projectodd.vdx.core.handlers
-             DuplicateAttributeHandler
-             DuplicateElementHandler
-             InvalidAttributeValueHandler
-             RequiredAttributeMissingHandler
-             RequiredElementMissingHandler
-             RequiredElementsMissingHandler
-             UnexpectedAttributeHandler
-             UnexpectedElementHandler
-             UnsupportedElementHandler
-             UnknownErrorHandler)
-           (org.projectodd.vdx.core ValidationContext ValidationError ErrorType I18N$Key)
+  (:import (org.projectodd.vdx.core ValidationContext ValidationError ErrorType I18N$Key)
            (org.projectodd.vdx.core.schema SchemaElement)
            (javax.xml.stream Location)
            (javax.xml.namespace QName)
@@ -52,8 +41,7 @@
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
               [(io/resource "schemas/handler-test.xsd")])]
     (testing "with an attribute"
-      (let [res (.handle (DuplicateElementHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/DUPLICATE_ELEMENT
                         ""
                         (location 7 4))
@@ -67,8 +55,7 @@
         (is (empty? (.primaryMessages (first (.secondaryResults res)))))))
     
     (testing "without an attribute"
-      (let [res (.handle (DuplicateElementHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/DUPLICATE_ELEMENT
                         ""
                         (location 7 4))
@@ -83,8 +70,7 @@
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
               [(io/resource "schemas/handler-test.xsd")])]
     (testing "unmatchable attribute with no alternates"
-      (let [res (.handle (UnexpectedAttributeHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNEXPECTED_ATTRIBUTE
                         ""
                         (location 6 4))
@@ -100,8 +86,7 @@
           "ham")))
 
     (testing "unmatchable attribute with schema alternatives"
-      (let [res (.handle (UnexpectedAttributeHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNEXPECTED_ATTRIBUTE
                         ""
                         (location 4 4))
@@ -112,8 +97,7 @@
           ["attr1" "some-attr"])))
 
     (testing "unmatchable attribute with provided alternatives"
-      (let [res (.handle (UnexpectedAttributeHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNEXPECTED_ATTRIBUTE
                         ""
                         (location 4 4))
@@ -125,8 +109,7 @@
           ["abc"])))
 
     (testing "misspelled attribute with schema alternatives"
-      (let [res (.handle (UnexpectedAttributeHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNEXPECTED_ATTRIBUTE
                         ""
                         (location 4 4))
@@ -138,8 +121,7 @@
           "attr1")))
 
     (testing "misspelled attribute with provided alternatives"
-      (let [res (.handle (UnexpectedAttributeHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNEXPECTED_ATTRIBUTE
                         ""
                         (location 4 4))
@@ -151,8 +133,7 @@
           I18N$Key/DID_YOU_MEAN "attrx")))
 
     (testing "matchable attribute"
-      (let [res (.handle (UnexpectedAttributeHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNEXPECTED_ATTRIBUTE
                         ""
                         (location 4 4))
@@ -167,8 +148,7 @@
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
               [(io/resource "schemas/handler-test.xsd")])]
     (testing "it's really a duplicate"
-      (let [res (.handle (UnexpectedElementHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNEXPECTED_ELEMENT
                         ""
                         (location 7 4))
@@ -180,8 +160,7 @@
         (is (empty? (.primaryMessages (first (.secondaryResults res)))))))
     
     (testing "unmatchable element with no alternates"
-      (let [res (.handle (UnexpectedElementHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNEXPECTED_ELEMENT
                         ""
                         (location 6 4))
@@ -194,8 +173,7 @@
         (is (empty? (.secondaryMessages res)))))
 
     (testing "unmatchable element with provided alternatives"
-      (let [res (.handle (UnexpectedElementHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNEXPECTED_ELEMENT
                         ""
                         (location 6 4))
@@ -206,8 +184,7 @@
           ["abcdefg"])))
 
     (testing "misspelled element with provided alternatives"
-      (let [res (.handle (UnexpectedElementHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNEXPECTED_ELEMENT
                         ""
                         (location 6 4))
@@ -222,8 +199,7 @@
         ))
 
     (testing "misspelled element without provided alternatives"
-      (let [res (.handle (UnexpectedElementHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNEXPECTED_ELEMENT
                         ""
                         (location 6 4))
@@ -237,8 +213,7 @@
         ))
 
     (testing "matchable element"
-      (let [res (.handle (UnexpectedElementHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNEXPECTED_ELEMENT
                         ""
                         (location 7 4))
@@ -251,8 +226,7 @@
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
               [(io/resource "schemas/handler-test.xsd")])]
     (testing "with fallback"
-      (let [res (.handle (UnknownErrorHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNKNOWN_ERROR
                         "foo"
                         (location 1 1))
@@ -261,8 +235,7 @@
           I18N$Key/PASSTHRU "bar")))
     
     (testing "with parse error"
-      (let [res (.handle (UnknownErrorHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (ValidationError. ErrorType/UNKNOWN_ERROR
                     "Unexpected close tag </aauthentication>; expected </authentication>.\n at [row,col {unknown-source}]: [38,33]"
                     (location 1 1)))]
@@ -273,8 +246,7 @@
   (let [ctx (ValidationContext. (io/resource "handler-test.xml")
               [(io/resource "schemas/handler-test.xsd")])]
     (testing "with alternatives"
-      (let [res (.handle (UnsupportedElementHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNSUPPORTED_ELEMENT
                         ""
                         (location 7 4))
@@ -284,8 +256,7 @@
           I18N$Key/ELEMENT_UNSUPPORTED "bar" "barr"))
 
       (testing "without alternatives"
-      (let [res (.handle (UnsupportedElementHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/UNSUPPORTED_ELEMENT
                         ""
                         (location 7 4))
@@ -294,8 +265,7 @@
           I18N$Key/ELEMENT_UNSUPPORTED_NO_ALT "bar"))))
     
     (testing "without an attribute"
-      (let [res (.handle (DuplicateElementHandler.)
-                  ctx
+      (let [res (.handle ctx
                   (-> (ValidationError. ErrorType/DUPLICATE_ELEMENT
                         ""
                         (location 7 4))

@@ -20,7 +20,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -94,15 +93,8 @@ public class ErrorReporter {
         return printed;
     }
 
-    private List<URL> findSchemas() {
-        final ServiceLoader<SchemaProvider> loader = ServiceLoader.load(SchemaProvider.class);
-        final SchemaProvider provider;
-        if (loader.iterator().hasNext()) {
-            provider = loader.iterator().next();
-        } else {
-            provider = new DefaultWildFlySchemaProvider();
-        }
-
+    protected List<URL> findSchemas() {
+        final SchemaProvider provider = schemaProvider();
         final List<URL> schemas = provider.schemas();
 
         if (schemas.isEmpty()) {
@@ -110,6 +102,10 @@ public class ErrorReporter {
         }
 
         return schemas;
+    }
+
+    protected SchemaProvider schemaProvider() {
+        return new DefaultWildFlySchemaProvider();
     }
 
     private final File document;

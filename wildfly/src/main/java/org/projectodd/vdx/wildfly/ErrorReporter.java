@@ -16,7 +16,6 @@
 
 package org.projectodd.vdx.wildfly;
 
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,18 +25,17 @@ import java.util.regex.Pattern;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
-import org.jboss.logging.BasicLogger;
 import org.projectodd.vdx.core.ErrorPrinter;
 import org.projectodd.vdx.core.ErrorType;
 import org.projectodd.vdx.core.I18N;
+import org.projectodd.vdx.core.Printer;
 import org.projectodd.vdx.core.Stringifier;
 import org.projectodd.vdx.core.ValidationError;
 import org.projectodd.vdx.core.XMLStreamValidationException;
 
-public class ErrorReporter {
-    public ErrorReporter(final File document, final BasicLogger logger) {
+public abstract class ErrorReporter {
+    public ErrorReporter(final URL document) {
         this.document = document;
-        this.logger = logger;
     }
 
     /**
@@ -78,8 +76,8 @@ public class ErrorReporter {
 
                 SchemaDocRelationships rel = new SchemaDocRelationships();
 
-                new ErrorPrinter(this.document.toURI().toURL(), schemas)
-                        .printer(new LoggingPrinter(this.logger))
+                new ErrorPrinter(this.document, schemas)
+                        .printer(printer())
                         .stringifiers(stringifiers)
                         .pathGate(rel)
                         .prefixProvider(rel)
@@ -87,7 +85,7 @@ public class ErrorReporter {
                 printed = true;
             }
         } catch (Exception ex) {
-            this.logger.info(I18N.failedToPrintError(ex));
+            printer().println(I18N.failedToPrintError(ex));
         }
 
         return printed;
@@ -98,16 +96,15 @@ public class ErrorReporter {
         final List<URL> schemas = provider.schemas();
 
         if (schemas.isEmpty()) {
-            this.logger.info(I18N.noSchemasAvailable(provider.schemaResource()));
+            printer().println(I18N.noSchemasAvailable(provider.schemaResource()));
         }
 
         return schemas;
     }
 
-    protected SchemaProvider schemaProvider() {
-        return new DefaultWildFlySchemaProvider();
-    }
+    protected abstract SchemaProvider schemaProvider();
 
-    private final File document;
-    private final BasicLogger logger;
+    protected abstract Printer printer();
+
+    private final URL document;
 }

@@ -16,7 +16,6 @@
 
 package org.projectodd.vdx.core;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -47,7 +46,7 @@ public class ErrorPrinter {
             out.append(divider(1))
                     .append('\n');
 
-            this.printer.println(Util.withPrefixAfterNth(2, "|", out.toString()));
+            this.printer.printlnErr(Util.withPrefixAfterNth(2, "|", out.toString()));
         }
     }
 

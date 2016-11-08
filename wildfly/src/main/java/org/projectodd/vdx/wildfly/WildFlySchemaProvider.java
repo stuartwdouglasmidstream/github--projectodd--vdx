@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DefaultWildFlySchemaProvider implements SchemaProvider {
+public class WildFlySchemaProvider implements SchemaProvider {
     @Override
     public List<URL> schemas() {
         final File schemaRoot = schemaRoot();

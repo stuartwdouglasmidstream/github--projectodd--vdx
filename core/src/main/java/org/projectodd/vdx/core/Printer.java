@@ -16,14 +16,15 @@
 
 package org.projectodd.vdx.core;
 
-/**
- * Created by tcrawley on 7/6/16.
- */
 public interface Printer {
     Printer DEFAULT_PRINTER = new Printer() {};
 
-    default void println(String msg) {
+    default void printlnErr(String msg) {
         System.err.println(msg);
+    }
+
+    default void println(String msg) {
+        System.out.println(msg);
     }
 
 }

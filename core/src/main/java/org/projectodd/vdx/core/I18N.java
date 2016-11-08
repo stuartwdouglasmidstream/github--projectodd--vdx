@@ -87,8 +87,8 @@ public class I18N {
         return format(Key.PRINT_FAILURE, "OPVDX002", ex.getMessage());
     }
 
-    public static String noSchemasAvailable(final File path) {
-        return format(Key.NO_SCHEMAS_AVAILABLE, "OPVDX003", path.getAbsolutePath());
+    public static String noSchemasAvailable(final String resource) {
+        return format(Key.NO_SCHEMAS_AVAILABLE, "OPVDX003", resource);
     }
 
     private static Locale activeLocale() {

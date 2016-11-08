@@ -17,14 +17,12 @@
 package org.projectodd.vdx.wildfly;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -38,9 +36,8 @@ import org.projectodd.vdx.core.ValidationError;
 import org.projectodd.vdx.core.XMLStreamValidationException;
 
 public class ErrorReporter {
-    public ErrorReporter(final File document, final File schemaRoot, final BasicLogger logger) {
+    public ErrorReporter(final File document, final BasicLogger logger) {
         this.document = document;
-        this.schemaRoot = schemaRoot;
         this.logger = logger;
     }
 
@@ -50,45 +47,32 @@ public class ErrorReporter {
      * @return true if the error was actually printed
      */
     public boolean report(final XMLStreamException exception) {
-        final ValidationError error;
-        if (exception instanceof XMLStreamValidationException) {
-            error = ((XMLStreamValidationException)exception).getValidationError();
-        } else {
-            final String message = exception.getMessage();
-
-            // detect duplicate attribute - this message comes from woodstox, and isn't i18n, so we don't have to
-            // worry about other languages
-            final Matcher dupMatcher = Pattern.compile("^Duplicate attribute '(.+?)'\\.").matcher(message);
-            if (dupMatcher.find()) {
-                error = ValidationError.from(exception, ErrorType.DUPLICATE_ATTRIBUTE)
-                        .attribute(QName.valueOf(dupMatcher.group(1)));
-            } else {
-                error = ValidationError.from(exception, ErrorType.UNKNOWN_ERROR);
-                // attempt to strip the message code
-                final Matcher m = Pattern.compile("Message: \"?([A-Z]+\\d+: )?(.*?)\"?$").matcher(message);
-                if (m.find()) {
-                    error.fallbackMessage(m.group(2));
-                }
-            }
-        }
-
         boolean printed = false;
-
         try {
-            final File[] schemaFiles = this.schemaRoot.listFiles();
-            if (this.schemaRoot.exists() && schemaFiles != null) {
-                printed = true;
+            final List<URL> schemas = findSchemas();
 
-                final List<URL> schemas = Arrays.stream(schemaFiles)
-                        .filter(f -> f.getName().endsWith(".xsd"))
-                        .map(f -> {
-                            try {
-                                return f.toURI().toURL();
-                            } catch (MalformedURLException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        })
-                        .collect(Collectors.toList());
+            if (!schemas.isEmpty()) {
+                final ValidationError error;
+                if (exception instanceof XMLStreamValidationException) {
+                    error = ((XMLStreamValidationException) exception).getValidationError();
+                } else {
+                    final String message = exception.getMessage();
+
+                    // detect duplicate attribute - this message comes from woodstox, and isn't i18n, so we don't have to
+                    // worry about other languages
+                    final Matcher dupMatcher = Pattern.compile("^Duplicate attribute '(.+?)'\\.").matcher(message);
+                    if (dupMatcher.find()) {
+                        error = ValidationError.from(exception, ErrorType.DUPLICATE_ATTRIBUTE)
+                                .attribute(QName.valueOf(dupMatcher.group(1)));
+                    } else {
+                        error = ValidationError.from(exception, ErrorType.UNKNOWN_ERROR);
+                        // attempt to strip the message code
+                        final Matcher m = Pattern.compile("Message: \"?([A-Z]+\\d+: )?(.*?)\"?$").matcher(message);
+                        if (m.find()) {
+                            error.fallbackMessage(m.group(2));
+                        }
+                    }
+                }
 
                 final List<Stringifier> stringifiers = new ArrayList<>();
                 stringifiers.add(new SubsystemStringifier());
@@ -101,18 +85,33 @@ public class ErrorReporter {
                         .pathGate(rel)
                         .prefixProvider(rel)
                         .print(error);
-            } else {
-                this.logger.info(I18N.noSchemasAvailable(this.schemaRoot));
+                printed = true;
             }
         } catch (Exception ex) {
-            printed = false;
             this.logger.info(I18N.failedToPrintError(ex));
         }
 
         return printed;
     }
 
+    private List<URL> findSchemas() {
+        final ServiceLoader<SchemaProvider> loader = ServiceLoader.load(SchemaProvider.class);
+        final SchemaProvider provider;
+        if (loader.iterator().hasNext()) {
+            provider = loader.iterator().next();
+        } else {
+            provider = new DefaultWildFlySchemaProvider();
+        }
+
+        final List<URL> schemas = provider.schemas();
+
+        if (schemas.isEmpty()) {
+            this.logger.info(I18N.noSchemasAvailable(provider.schemaResource()));
+        }
+
+        return schemas;
+    }
+
     private final File document;
-    private final File schemaRoot;
     private final BasicLogger logger;
 }

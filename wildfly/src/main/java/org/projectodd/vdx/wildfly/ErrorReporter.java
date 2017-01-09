@@ -64,7 +64,7 @@ public abstract class ErrorReporter {
                     } else {
                         error = ValidationError.from(exception, ErrorType.UNKNOWN_ERROR);
                         // attempt to strip the message code
-                        final Matcher m = Pattern.compile("Message: \"?([A-Z]+\\d+: )?(.*?)\"?$").matcher(message);
+                        final Matcher m = Pattern.compile("\"?([A-Z]+\\d+: )?(.*?)\"?$").matcher(message);
                         if (m.find()) {
                             error.fallbackMessage(m.group(2));
                         }

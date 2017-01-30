@@ -91,10 +91,10 @@ public class SchemaWalker {
                         break;
 
                     case "xs:attribute":
-                        if (currentType != null) {
-                            currentType.addAttribute(nameAttr);
-                        } else if (currentElement != null) {
+                        if (currentElement != null) {
                             currentElement.addAttribute(nameAttr);
+                        } else if (currentType != null) {
+                            currentType.addAttribute(nameAttr);
                         }
                         break;
 
@@ -116,10 +116,10 @@ public class SchemaWalker {
 
                     case "xs:extension":
                         final QName base = qname(attributes.getValue("base"));
-                        if (currentType != null) {
-                            currentType.base(base);
-                        } else if (currentElement != null) {
+                        if (currentElement != null) {
                             currentElement.base(base);
+                        } else if (currentType != null) {
+                            currentType.base(base);
                         }
                         break;
                 }

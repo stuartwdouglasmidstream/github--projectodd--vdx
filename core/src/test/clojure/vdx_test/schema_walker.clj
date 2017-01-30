@@ -53,6 +53,9 @@
         tree (Tree.)
         foo-tree (.addChild tree (schema-element "foo" "attr3"))
         _ (-> foo-tree
+              (.addChild (schema-element "properties-realm" "name"))
+              (.addChild (schema-element "users-properties" "path" "plain-text")))
+        _ (-> foo-tree
               (.addChild (schema-element "bar" "attr1" "some-attr"))
               (.addChild (schema-element "sandwiches"))
               (.addChild (schema-element "sandwich"))

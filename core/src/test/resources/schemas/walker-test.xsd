@@ -9,6 +9,7 @@
   <xs:element name="foo">
     <xs:complexType>
       <xs:sequence>
+        <xs:element name="properties-realm" type="propertiesRealmType"/>
         <xs:element name="bar" type="barType" minOccurs="0" maxOccurs="1"/>
         <xs:element name="biscuit" type="biscuitType" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
@@ -77,6 +78,34 @@
           <xs:element name="sconiness"/>
         </xs:sequence>
         <xs:attribute name="flake"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+
+  <xs:complexType name="realmType" abstract="true">
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="basicFileType">
+    <xs:attribute name="path" type="xs:string" use="required"/>
+  </xs:complexType>
+
+
+  <xs:complexType name="propertiesRealmType">
+    <xs:complexContent>
+      <xs:extension base="realmType">
+        <xs:all>
+          <xs:element name="users-properties">
+            <xs:complexType >
+              <xs:complexContent>
+                <xs:extension base="basicFileType">
+                  <xs:attribute name="plain-text" type="xs:boolean" default="false"/>
+                </xs:extension>
+              </xs:complexContent>
+            </xs:complexType>
+          </xs:element>
+        </xs:all>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

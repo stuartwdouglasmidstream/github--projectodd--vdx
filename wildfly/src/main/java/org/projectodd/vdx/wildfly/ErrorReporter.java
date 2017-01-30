@@ -19,6 +19,7 @@ package org.projectodd.vdx.wildfly;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,18 +56,16 @@ public abstract class ErrorReporter {
                 } else {
                     final String message = exception.getMessage();
 
-                    // detect duplicate attribute - this message comes from woodstox, and isn't i18n, so we don't have to
-                    // worry about other languages
-                    final Matcher dupMatcher = Pattern.compile("^Duplicate attribute '(.+?)'\\.").matcher(message);
-                    if (dupMatcher.find()) {
+                    final Optional<String> dupAttribute = duplicateAttribute(message);
+
+                    if (dupAttribute.isPresent()) {
                         error = ValidationError.from(exception, ErrorType.DUPLICATE_ATTRIBUTE)
-                                .attribute(QName.valueOf(dupMatcher.group(1)));
+                                .attribute(QName.valueOf(dupAttribute.get()));
                     } else {
                         error = ValidationError.from(exception, ErrorType.UNKNOWN_ERROR);
-                        // attempt to strip the message code
-                        final Matcher m = Pattern.compile("(Message: )?\"([A-Z]+\\d+: )?(.*?)\"$").matcher(message);
-                        if (m.find()) {
-                            error.fallbackMessage(m.group(3));
+                        final Optional<String> strippedMessage = stripMessageCode(message);
+                        if (strippedMessage.isPresent()) {
+                            error.fallbackMessage(strippedMessage.get());
                         }
                     }
                 }
@@ -89,6 +88,36 @@ public abstract class ErrorReporter {
         }
 
         return printed;
+    }
+
+    public static Optional<String> duplicateAttribute(final String msg) {
+        // detect duplicate attribute - this message comes from woodstox, and isn't i18n, so we don't have to
+        // worry about other languages
+        final Matcher dupMatcher = Pattern.compile("^Duplicate attribute '(.+?)'\\.").matcher(msg);
+        if (dupMatcher.find()) {
+
+            return Optional.of(dupMatcher.group(1));
+        }
+
+        return Optional.empty();
+    }
+
+    public static Optional<String> stripMessageCode(final String msg) {
+        // match Open/OracleJDK messages
+        Matcher m = Pattern.compile("Message: \"?([A-Z]+\\d+: )?(.*?)\"?$").matcher(msg);
+        if (m.find()) {
+
+            return Optional.of(m.group(2));
+        }
+
+        // match IBM JDK messages
+        m = Pattern.compile("^\"?([A-Z]+\\d+: )?(.*?)\"?$").matcher(msg);
+        if (m.find()) {
+
+            return Optional.of(m.group(2));
+        }
+
+        return Optional.empty();
     }
 
     protected List<URL> findSchemas() {

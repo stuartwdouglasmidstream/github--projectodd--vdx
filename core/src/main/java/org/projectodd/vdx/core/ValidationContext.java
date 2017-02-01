@@ -18,14 +18,20 @@ package org.projectodd.vdx.core;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -44,7 +50,7 @@ public class ValidationContext {
     public ValidationContext(final URL document, final List<URL> schemas) throws IOException {
         this.document = document;
         this.docWalker = new DocWalker(document);
-        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(document.openStream()))) {
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(document.openStream(), detectCharset(document)))) {
             this.lines = reader.lines().collect(Collectors.toList());
         }
 
@@ -333,6 +339,76 @@ public class ValidationContext {
         }
 
         return this.walkedSchemas;
+    }
+
+    private static final Map<Charset, byte[]> BOMS = new HashMap<Charset, byte[]>() {{
+        put(StandardCharsets.UTF_8, new byte[] {(byte)0xEF, (byte)0xBB, (byte)0xBF});
+        put(StandardCharsets.UTF_16, new byte[] {(byte)0xFE, (byte)0xFF});
+        put(StandardCharsets.UTF_16LE, new byte[] {(byte)0xFF, (byte)0xFE});
+    }};
+
+    private static boolean checkBom(final byte[] bom, final byte[] maybeBom) {
+        for (int i = 0; i < bom.length; i++) {
+            if (bom[i] != maybeBom[i]) {
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static Charset checkBom(final byte[] maybeBom) {
+        for (Map.Entry<Charset, byte[]> each: BOMS.entrySet()) {
+            if (checkBom(each.getValue(), maybeBom)) {
+
+                return each.getKey();
+            }
+        }
+
+        return null;
+    }
+
+    private static Charset detectBom(final URL document) {
+        Charset fromBom = null;
+        try (final InputStream in = document.openStream()) {
+            byte[] maybeBom = new byte[3];
+            in.read(maybeBom);
+            fromBom = checkBom(maybeBom);
+        } catch (IOException ignored) {}
+
+        return fromBom;
+    }
+
+    /*
+     * Minimal encoding detection. Doesn't validate that the encoding in the xml decl matches the bom.
+     * Doesn't inspect bytes other than the bom to guess the encoding. Tries to read the encoding from
+     * the xml decl using UTF-8 if no bom is found, which should be safe since everything in the decl
+     * should be ascii.
+     */
+    public static Charset detectCharset(final URL document) {
+        Charset charset = detectBom(document);
+        if (charset == null) {
+            try (final BufferedReader reader = new BufferedReader(new InputStreamReader(document.openStream(), StandardCharsets.UTF_8))) {
+                final String firstLine = reader.readLine();
+
+                charset = detectCharsetFromDecl(firstLine);
+            } catch (IOException ignored) {}
+        }
+
+        // default to UTF-8
+        return charset != null ? charset : StandardCharsets.UTF_8;
+    }
+
+    private static Charset detectCharsetFromDecl(final String xmlDecl) {
+        final Matcher m = Pattern.compile("\\sencoding\\s*=\\s*['\"](.*?)['\"]").matcher(xmlDecl.trim());
+        if (m.find()) {
+            try {
+                return Charset.forName(m.group(1));
+            } catch (UnsupportedCharsetException ignored) {}
+        }
+
+        return null;
     }
 
     private final URL document;

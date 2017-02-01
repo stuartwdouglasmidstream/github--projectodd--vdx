@@ -17,7 +17,8 @@
             [clojure.java.io :as io])
   (:import (org.projectodd.vdx.core ValidationContext)
            (javax.xml.namespace QName)
-           [org.projectodd.vdx.core.schema SchemaElement]))
+           [org.projectodd.vdx.core.schema SchemaElement]
+           [java.nio.charset Charset]))
 
 (defn assert-position [line col pos]
   (is (= line (.line pos)))
@@ -42,3 +43,17 @@
     (assert-position 3 33 (.searchBackward ctx 4 4 #"foo "))
     (is (not (.searchBackward ctx 0 0 #"foo ")))
     (is (not (.searchBackward ctx 4 4 #"asdfsafd")))))
+
+(deftest reading-xml-with-charset
+  (are [f]
+    (let [ctx (ValidationContext. (io/resource f) [])]
+      (= "<řebříček>obecný</řebříček>" (nth (.documentLines ctx) 1)))
+    "encoding-utf-16.xml"
+    "encoding-utf-8.xml"))
+
+(deftest detecting-xml-encoding
+  (are [exp given]
+    (= (Charset/forName exp) (ValidationContext/detectCharset (io/resource given)))
+    "UTF-16"   "encoding-utf-16.xml"
+    "UTF-8"    "encoding-utf-8.xml"
+    "US-ASCII" "encoding-us-ascii.xml"))

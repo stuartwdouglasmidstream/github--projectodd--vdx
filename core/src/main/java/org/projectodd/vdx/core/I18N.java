@@ -36,6 +36,7 @@ public class I18N {
         ATTRIBUTE_REQUIRED_MISSING_LIST,
 
         DID_YOU_MEAN,
+        DOCUMENT_HAS_NO_CONTENT,
 
         ELEMENT_DUPLICATED,
         ELEMENT_DUPLICATED_FIRST_OCCURRENCE,
@@ -89,6 +90,10 @@ public class I18N {
 
     public static String noSchemasAvailable(final String resource) {
         return format(Key.NO_SCHEMAS_AVAILABLE, "OPVDX003", resource);
+    }
+
+    public static String documentHasNoContent(final String docName) {
+        return format(Key.PRINT_FAILURE, "OPVDX004", format(Key.DOCUMENT_HAS_NO_CONTENT, docName));
     }
 
     private static Locale activeLocale() {

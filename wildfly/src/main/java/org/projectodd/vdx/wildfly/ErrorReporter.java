@@ -31,6 +31,7 @@ import org.projectodd.vdx.core.ErrorType;
 import org.projectodd.vdx.core.I18N;
 import org.projectodd.vdx.core.Printer;
 import org.projectodd.vdx.core.Stringifier;
+import org.projectodd.vdx.core.Util;
 import org.projectodd.vdx.core.ValidationError;
 import org.projectodd.vdx.core.XMLStreamValidationException;
 
@@ -75,13 +76,18 @@ public abstract class ErrorReporter {
 
                 SchemaDocRelationships rel = new SchemaDocRelationships();
 
-                new ErrorPrinter(this.document, schemas)
-                        .printer(printer())
-                        .stringifiers(stringifiers)
-                        .pathGate(rel)
-                        .prefixProvider(rel)
-                        .print(error);
-                printed = true;
+               final ErrorPrinter errPrinter = new ErrorPrinter(this.document, schemas)
+                       .printer(printer())
+                       .stringifiers(stringifiers)
+                       .pathGate(rel)
+                       .prefixProvider(rel);
+
+                if (errPrinter.documentHasContent()) {
+                    errPrinter.print(error);
+                    printed = true;
+                } else {
+                    printer().println(I18N.documentHasNoContent(Util.documentName(document)));
+                }
             }
         } catch (Exception ex) {
             printer().println(I18N.failedToPrintError(ex));

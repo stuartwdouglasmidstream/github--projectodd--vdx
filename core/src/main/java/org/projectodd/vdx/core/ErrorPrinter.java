@@ -33,6 +33,13 @@ public class ErrorPrinter {
         this.docURL = document;
     }
 
+    public boolean documentHasContent() {
+        return this.context.documentLines().stream()
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .count() > 0;
+    }
+
     public void print(ValidationError error) {
         final ErrorHandler.HandledResult res = this.context.handle(error);
 

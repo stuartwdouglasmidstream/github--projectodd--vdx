@@ -84,7 +84,7 @@ public class ValidationContext {
 
     public List<String> extractLines(final int start, final int end) {
         final List<String> ret = new ArrayList<>();
-        for (int idx = start; idx < end; idx++) {
+        for (int idx = start; idx < end && idx < this.lines.size(); idx++) {
             ret.add(this.lines.get(idx));
         }
 
@@ -401,11 +401,14 @@ public class ValidationContext {
     }
 
     private static Charset detectCharsetFromDecl(final String xmlDecl) {
-        final Matcher m = Pattern.compile("\\sencoding\\s*=\\s*['\"](.*?)['\"]").matcher(xmlDecl.trim());
-        if (m.find()) {
-            try {
-                return Charset.forName(m.group(1));
-            } catch (UnsupportedCharsetException ignored) {}
+        if (xmlDecl != null) {
+            final Matcher m = Pattern.compile("\\sencoding\\s*=\\s*['\"](.*?)['\"]").matcher(xmlDecl.trim());
+            if (m.find()) {
+                try {
+                    return Charset.forName(m.group(1));
+                } catch (UnsupportedCharsetException ignored) {
+                }
+            }
         }
 
         return null;

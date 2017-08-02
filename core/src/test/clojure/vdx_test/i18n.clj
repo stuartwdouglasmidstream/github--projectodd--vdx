@@ -14,9 +14,19 @@
 
 (ns vdx-test.i18n
   (:require [clojure.test :refer :all])
-  (:import [org.projectodd.vdx.core I18N I18N$Key]))
-
+  (:import [org.projectodd.vdx.core I18N I18N$Key]
+           java.util.Locale))
 
 (deftest all-keys-should-have-entries
   (doseq [k (I18N$Key/values)]
     (is (I18N/lookup k))))
+
+(deftest can-load-other-locale
+  (I18N/reset)
+  (I18N/setLocale Locale/GERMANY)
+  (is (= "Meinten Sie \"%s\"?" (I18N/lookup I18N$Key/DID_YOU_MEAN))))
+
+(deftest uses-default-messages-when-locale-not-found
+  (I18N/reset)
+  (I18N/setLocale Locale/ITALY)
+  (is (= "Did you mean '%s'?" (I18N/lookup I18N$Key/DID_YOU_MEAN))))

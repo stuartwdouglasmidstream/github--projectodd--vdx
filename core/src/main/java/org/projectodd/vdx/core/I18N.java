@@ -96,6 +96,11 @@ public class I18N {
         return format(Key.PRINT_FAILURE, "OPVDX004", format(Key.DOCUMENT_HAS_NO_CONTENT, docName));
     }
 
+    public static void reset() {
+        locale = null;
+        bundle = null;
+    }
+    
     private static Locale activeLocale() {
         return locale == null ? Locale.getDefault() : locale;
     }
